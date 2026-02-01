@@ -66,11 +66,11 @@ export default function RoomMaster() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-slate-800">Room Master</h2>
                 <button
                     onClick={handleNew}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm font-bold"
                 >
                     <Plus className="w-4 h-4" />
                     Add New Room
@@ -81,14 +81,14 @@ export default function RoomMaster() {
                 {/* List */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
+                        <table className="w-full text-left text-sm min-w-[500px]">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="px-6 py-4 font-semibold text-slate-700">Room</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-700">Type</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-700">Floor</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-700">Status</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-700">Condition</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Room</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Type</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Floor</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Status</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Condition</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -101,10 +101,10 @@ export default function RoomMaster() {
                                             selectedRoom?.roomNo === room.roomNo ? "bg-blue-50" : ""
                                         )}
                                     >
-                                        <td className="px-6 py-4 font-medium">{room.roomNo}</td>
-                                        <td className="px-6 py-4">{room.roomType}</td>
-                                        <td className="px-6 py-4">{room.floor}</td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-4 font-medium">{room.roomNo}</td>
+                                        <td className="px-4 sm:px-6 py-4">{room.roomType}</td>
+                                        <td className="px-4 sm:px-6 py-4">{room.floor}</td>
+                                        <td className="px-4 sm:px-6 py-4">
                                             <span className={clsx(
                                                 "px-2 py-1 rounded-full text-xs font-semibold",
                                                 room.statusOfRoom === 'Occupied' ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
@@ -112,7 +112,7 @@ export default function RoomMaster() {
                                                 {room.statusOfRoom}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-4">
                                             <span className={clsx(
                                                 "px-2 py-1 rounded-full text-xs font-semibold",
                                                 room.cleaningStatus === 'Dirty' ? "bg-yellow-100 text-yellow-700" : "bg-slate-100 text-slate-700"
@@ -128,7 +128,7 @@ export default function RoomMaster() {
                 </div>
 
                 {/* Form */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
+                <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit lg:sticky lg:top-6">
                     <h3 className="text-lg font-bold text-slate-800 mb-4">
                         {selectedRoom ? `Edit Room ${selectedRoom.roomNo}` : 'New Room'}
                     </h3>

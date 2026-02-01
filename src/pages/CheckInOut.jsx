@@ -334,25 +334,25 @@ export default function CheckInOut() {
     return (
         <div className="space-y-4 max-w-[1400px] mx-auto">
             {/* Header / Top Actions - HIDDEN ON PRINT */}
-            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-200 print:hidden">
-                <h2 className="text-2xl font-bold text-slate-800">Check- In / Out</h2>
-                <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-lg border border-slate-200 gap-4 print:hidden">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Check- In / Out</h2>
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     <button
                         onClick={() => setShowFilters(true)}
-                        className="bg-slate-800 text-white px-6 py-2 rounded-lg border border-slate-700 hover:bg-slate-900 transition font-bold shadow-md flex items-center gap-2"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-900 transition font-bold shadow-md"
                     >
-                        <Filter size={18} className="text-cyan-400" /> Filter Options
+                        <Filter size={18} className="text-cyan-400" /> Filter
                     </button>
                     <button
                         onClick={handleEditSelected}
                         disabled={!selectedBooking || viewMode !== 'VIEW'}
-                        className="bg-blue-100 text-blue-700 px-6 py-2 rounded border border-blue-300 hover:bg-blue-200 transition font-medium disabled:opacity-50"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded border border-blue-300 hover:bg-blue-200 transition font-medium disabled:opacity-50"
                     >
-                        Edit selected Booking
+                        Edit
                     </button>
                     <button
                         onClick={handleBack}
-                        className="bg-red-200 text-red-800 px-6 py-2 rounded border border-red-300 hover:bg-red-300 transition font-medium"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-200 text-red-800 px-4 py-2 rounded border border-red-300 hover:bg-red-300 transition font-medium"
                     >
                         Back
                     </button>
@@ -447,256 +447,163 @@ export default function CheckInOut() {
             </div>
 
             {/* Form Area - HIDDEN ON PRINT */}
-            <div className="bg-slate-100 p-6 rounded-lg border border-slate-300 shadow-sm print:hidden">
-                <form className="grid gap-y-3 gap-x-6 text-sm" autoComplete="off">
-                    {/* Row 1 - Yellow Highlights per screenshot */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium font-bold">Booking Id</label>
-                        <input
-                            name="bookingId"
-                            value={formData.bookingId}
-                            readOnly
-                            className="col-span-3 px-2 py-1 border border-slate-300 bg-yellow-100 rounded font-bold"
-                        />
-
-                        <label className="col-span-1 text-slate-700 font-medium font-bold">Channel</label>
-                        <select
-                            name="channel"
-                            value={formData.channel}
-                            onChange={handleChange}
-                            disabled={viewMode === 'VIEW'}
-                            className="col-span-2 px-2 py-1 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80"
-                        >
-                            <option>Direct</option>
-                            <option>Booking.com</option>
-                            <option>Airbnb</option>
-                            <option>Expedia</option>
+            <div className="bg-slate-100 p-4 sm:p-6 rounded-lg border border-slate-300 shadow-sm print:hidden">
+                <form className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 text-sm" autoComplete="off">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold">Booking Id</label>
+                        <input name="bookingId" value={formData.bookingId} readOnly className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded font-bold" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold">Channel</label>
+                        <select name="channel" value={formData.channel} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80">
+                            <option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Expedia</option>
                         </select>
-
-                        <label className="col-span-1 text-slate-700 font-medium font-bold whitespace-nowrap">Booking Date</label>
-                        <input
-                            type="date"
-                            name="bookingDate"
-                            value={formData.bookingDate}
-                            onChange={handleChange}
-                            disabled={viewMode === 'VIEW'}
-                            className="col-span-2 px-2 py-1 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80"
-                        />
-
-                        <label className="col-span-1 text-slate-700 font-medium font-bold">Nationality</label>
-                        <input
-                            name="nationality"
-                            value={formData.nationality}
-                            onChange={handleChange}
-                            disabled={viewMode === 'VIEW'}
-                            className="col-span-1 px-2 py-1 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80"
-                        />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold">Booking Date</label>
+                        <input type="date" name="bookingDate" value={formData.bookingDate} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold">Nationality</label>
+                        <input name="nationality" value={formData.nationality} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
                     </div>
 
-                    {/* Row 2 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Main Guest</label>
-                        <input
-                            name="mainGuestName"
-                            value={formData.mainGuestName}
-                            onChange={handleChange}
-                            disabled={viewMode === 'VIEW'}
-                            className="col-span-5 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                        />
-
-                        <label className="col-span-1 text-slate-700 font-medium">Check in dt.</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input
-                                type="date"
-                                name="checkInDate"
-                                value={formData.checkInDate}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-full px-2 py-1 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80"
-                            />
-                        </div>
-
-                        <label className="col-span-1 text-slate-700 font-medium">Check out dt.</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input
-                                type="date"
-                                name="checkOutDate"
-                                value={formData.checkOutDate}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-full px-2 py-1 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80"
-                            />
-                        </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Main Guest</label>
+                        <input name="mainGuestName" value={formData.mainGuestName} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Check in dt.</label>
+                        <input type="date" name="checkInDate" value={formData.checkInDate} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Check out dt.</label>
+                        <input type="date" name="checkOutDate" value={formData.checkOutDate} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
                     </div>
 
-                    {/* Row 3 - Room Type, Nights */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Total Guest</label>
-                        <div className="col-span-5 flex items-center gap-2">
-                            <input
-                                type="number"
-                                name="totalGuests"
-                                value={formData.totalGuests}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-16 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                            />
-                            <label className="text-slate-700 font-medium">Childrens</label>
-                            <input
-                                type="number"
-                                name="children"
-                                value={formData.children}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-16 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                            />
-                            <label className="text-slate-700 font-medium">Age</label>
-                            <input
-                                name="childrenAges"
-                                value={formData.childrenAges}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                            />
-                        </div>
-
-                        <label className="col-span-1 text-slate-700 font-medium font-bold text-blue-600">Assign Room</label>
-                        <div className="col-span-2 flex gap-1">
-                            <select
-                                name="roomType"
-                                value={formData.roomType}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-1/2 px-1 py-1 border border-slate-300 bg-white rounded font-bold disabled:bg-slate-50"
-                            >
-                                <option value="T0">T0</option>
-                                <option value="T1">T1</option>
-                                <option value="T1F">T1F</option>
-                                <option value="T2">T2</option>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Total Guest</label>
+                        <input type="number" name="totalGuests" value={formData.totalGuests} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Childrens</label>
+                        <input type="number" name="children" value={formData.children} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Age</label>
+                        <input name="childrenAges" value={formData.childrenAges} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold text-blue-600">Assign Room</label>
+                        <div className="flex gap-2">
+                            <select name="roomType" value={formData.roomType} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-1 py-1.5 border border-slate-300 bg-white rounded font-bold disabled:bg-slate-50">
+                                <option value="T0">T0</option><option value="T1">T1</option><option value="T1F">T1F</option><option value="T2">T2</option>
                             </select>
-                            <select
-                                name="assignedRoomNo"
-                                value={formData.assignedRoomNo}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-1/2 px-1 py-1 border border-slate-300 bg-yellow-50 rounded text-xs font-bold"
-                            >
+                            <select name="assignedRoomNo" value={formData.assignedRoomNo} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-1 py-1.5 border border-slate-300 bg-yellow-50 rounded text-xs font-bold">
                                 <option value="">Room</option>
-                                {rooms
-                                    .filter(r => r.roomType === formData.roomType)
-                                    .map(r => (
-                                        <option key={r.roomNo} value={r.roomNo}>
-                                            {r.roomNo} ({r.statusOfRoom})
-                                        </option>
-                                    ))}
+                                {rooms.filter(r => r.roomType === formData.roomType).map(r => (
+                                    <option key={r.roomNo} value={r.roomNo}>{r.roomNo} ({r.statusOfRoom})</option>
+                                ))}
                             </select>
                         </div>
-
-                        <label className="col-span-1 text-slate-700 font-medium">No. of Nights</label>
-                        <input
-                            value={formData.nights}
-                            readOnly
-                            className="col-span-2 px-2 py-1 bg-green-500 text-white font-bold rounded text-center"
-                        />
                     </div>
 
-                    {/* Financials & Other Rows (Same as Bookings) */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">Total Booking Amount</label>
-                        <input
-                            type="number"
-                            name="totalBookingAmount"
-                            value={formData.totalBookingAmount}
-                            onChange={handleChange}
-                            disabled={viewMode === 'VIEW'}
-                            className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                        />
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Commision % & Amt</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input
-                                type="number"
-                                name="commissionPercent"
-                                placeholder="%"
-                                value={formData.commissionPercent}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-1/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                            />
-                            <input
-                                type="number"
-                                name="commissionAmount"
-                                placeholder="Amt"
-                                value={formData.commissionAmount}
-                                onChange={handleChange}
-                                disabled={viewMode === 'VIEW'}
-                                className="w-2/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50"
-                            />
-                        </div>
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Tax % & Amount</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input name="taxPercent" placeholder="%" value={formData.taxPercent} onChange={handleChange} disabled={viewMode === 'VIEW'} className="w-1/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                            <input name="taxAmount" placeholder="Amt" value={formData.taxAmount} onChange={handleChange} disabled={viewMode === 'VIEW'} className="w-2/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">No. of Nights</label>
+                        <input value={formData.nights} readOnly className="px-2 py-1.5 bg-green-500 text-white font-bold rounded text-center" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Total Booking Amount</label>
+                        <input type="number" name="totalBookingAmount" value={formData.totalBookingAmount} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Commision %</label>
+                        <input type="number" name="commissionPercent" placeholder="%" value={formData.commissionPercent} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Commision Amt</label>
+                        <input type="number" name="commissionAmount" placeholder="Amt" value={formData.commissionAmount} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">City Tax Amount</label>
-                        <input name="cityTax" value={formData.cityTax} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Security Deposite</label>
-                        <input name="securityDeposit" value={formData.securityDeposit} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Mode</label>
-                        <select name="paymentMode" value={formData.paymentMode} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold text-red-600">Tax %</label>
+                        <input name="taxPercent" placeholder="%" value={formData.taxPercent} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Tax Amount</label>
+                        <input name="taxAmount" placeholder="Amt" value={formData.taxAmount} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">City Tax Amount</label>
+                        <input name="cityTax" value={formData.cityTax} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Security Deposite</label>
+                        <input name="securityDeposit" value={formData.securityDeposit} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Payment Mode</label>
+                        <select name="paymentMode" value={formData.paymentMode} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50">
                             <option value="">Select</option><option value="Cash">Cash</option><option value="Bank Trf">Bank Trf</option><option value="Card">Card</option>
                         </select>
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Collected by</label>
-                        <input name="collectedBy" value={formData.collectedBy} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
-
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-3 text-slate-700 font-medium">Direct Booking Payment mode</label>
-                        <select name="directPaymentMode" value={formData.directPaymentMode} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Collected by</label>
+                        <input name="collectedBy" value={formData.collectedBy} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Direct Pay Mode</label>
+                        <select name="directPaymentMode" value={formData.directPaymentMode} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50">
                             <option value="">Select</option><option value="Cash">Cash</option><option value="Bank Trf">Bank Trf</option><option value="Card">Card</option>
                         </select>
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Payout Received</label>
-                        <input type="number" name="payoutReceived" value={formData.payoutReceived} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Received by</label>
-                        <input name="receivedBy" value={formData.receivedBy} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Payout Received</label>
+                        <input type="number" name="payoutReceived" value={formData.payoutReceived} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Arrival time</label>
-                        <input type="time" name="arrivalTime" value={formData.arrivalTime} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Remarks</label>
-                        <input name="remarks" value={formData.remarks} onChange={handleChange} disabled={viewMode === 'VIEW'} className="col-span-8 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Received by</label>
+                        <input name="receivedBy" value={formData.receivedBy} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Arrival time</label>
+                        <input type="time" name="arrivalTime" value={formData.arrivalTime} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Remarks</label>
+                        <input name="remarks" value={formData.remarks} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">Contact No. & Email</label>
-                        <div className="col-span-10 flex gap-4">
-                            <input name="contactPhone" placeholder="Phone Number" value={formData.contactPhone} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                            <input name="contactEmail" placeholder="Email Address" value={formData.contactEmail} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
-                        </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Contact No.</label>
+                        <input name="contactPhone" placeholder="Phone Number" value={formData.contactPhone} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Email Address</label>
+                        <input name="contactEmail" placeholder="Email Address" value={formData.contactEmail} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
                 </form>
 
                 {/* Main Action Buttons */}
-                <div className="flex gap-2 mt-6">
-                    <button onClick={handleSave} disabled={viewMode === 'VIEW'} className="flex-1 bg-green-200 text-green-800 py-2 rounded border border-green-400 hover:bg-green-300 font-medium transition disabled:opacity-50">Save Booking</button>
-                    <button onClick={handleMarkCheckIn} disabled={!selectedBooking || formData.checkedIn || viewMode !== 'VIEW'} className="flex-1 bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Marked Checked-In</button>
-                    <button onClick={() => { setPrintMode('SINGLE'); setTimeout(() => window.print(), 100); }} disabled={!selectedBooking || viewMode !== 'VIEW'} className="flex-1 bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Print Invoice</button>
-                    <button onClick={() => { setPrintMode('OUT_REGISTER'); setTimeout(() => window.print(), 100); }} disabled={viewMode !== 'VIEW'} className="flex-1 bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Check in Register</button>
-                    <button onClick={handleDelete} disabled={!selectedBooking || currentUser.userType !== 'Admin' || viewMode !== 'VIEW'} className="flex-1 bg-red-200 text-red-800 py-2 rounded border border-red-300 hover:bg-red-300 font-medium transition disabled:opacity-50 font-bold">delete Booking</button>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 mt-6">
+                    <button onClick={handleSave} disabled={viewMode === 'VIEW'} className="bg-green-200 text-green-800 py-2 rounded border border-green-400 hover:bg-green-300 font-medium transition disabled:opacity-50">Save</button>
+                    <button onClick={handleMarkCheckIn} disabled={!selectedBooking || formData.checkedIn || viewMode !== 'VIEW'} className="bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Check-In</button>
+                    <button onClick={() => { setPrintMode('SINGLE'); setTimeout(() => window.print(), 100); }} disabled={!selectedBooking || viewMode !== 'VIEW'} className="bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Print Inv</button>
+                    <button onClick={() => { setPrintMode('OUT_REGISTER'); setTimeout(() => window.print(), 100); }} disabled={viewMode !== 'VIEW'} className="bg-blue-200 text-blue-800 py-2 rounded border border-blue-400 hover:bg-blue-300 font-medium transition disabled:opacity-50">Register</button>
+                    <button onClick={handleDelete} disabled={!selectedBooking || currentUser.userType !== 'Admin' || viewMode !== 'VIEW'} className="bg-red-200 text-red-800 py-2 rounded border border-red-300 hover:bg-red-300 font-medium transition disabled:opacity-50 font-bold">Delete</button>
                 </div>
 
                 {/* ID Proof Section - Always Editable for documentation */}
                 <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-                    <label className="block text-sm font-bold text-yellow-800 mb-2 uppercase tracking-tight flex justify-between">
-                        <span>ID Proof Memo & Images (Paste Pictures Directly)</span>
-                        <span className="text-[10px] text-yellow-600 font-normal">Pasted images are automatically compressed</span>
+                    <label className="block text-sm font-bold text-yellow-800 mb-2 uppercase tracking-tight flex flex-col sm:flex-row justify-between gap-1">
+                        <span>ID Proof Memo & Images (Paste Directly)</span>
+                        <span className="text-[10px] text-yellow-600 font-normal">Pasted images are auto-compressed</span>
                     </label>
 
-                    <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        <div className="lg:col-span-8">
                             <textarea
                                 name="idProofMemo"
                                 value={formData.idProofMemo}
@@ -706,7 +613,7 @@ export default function CheckInOut() {
                                 placeholder="Paste Guest ID text or PICTURES here..."
                             ></textarea>
                         </div>
-                        <div className="col-span-4 border border-yellow-300 rounded bg-white p-2 overflow-y-auto max-h-32 flex flex-wrap gap-2">
+                        <div className="lg:col-span-4 border border-yellow-300 rounded bg-white p-2 overflow-y-auto max-h-32 flex flex-wrap gap-2">
                             {formData.idProofImages && formData.idProofImages.length > 0 ? (
                                 formData.idProofImages.map((img, idx) => (
                                     <div key={idx} className="relative group w-20 h-20 border rounded overflow-hidden shadow-sm">
@@ -722,7 +629,7 @@ export default function CheckInOut() {
                                 ))
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs text-center leading-tight italic">
-                                    No images pasted yet.<br />Select text area and press Ctrl+V to paste ID pictures.
+                                    No images pasted yet.<br />Press Ctrl+V to paste ID pictures.
                                 </div>
                             )}
                         </div>
@@ -730,12 +637,15 @@ export default function CheckInOut() {
                 </div>
 
                 {/* Check-Out Section */}
-                <div className="mt-4 pt-4 border-t border-slate-300 grid grid-cols-12 gap-4">
-                    <div className="col-span-2 flex flex-col justify-end">
-                        <label className="text-slate-700 font-medium mb-1">Check-out Note</label>
-                        <button onClick={handleMarkCheckOut} disabled={!selectedBooking || !formData.checkedIn} className="w-full bg-green-600 text-white py-4 rounded hover:bg-green-700 font-bold transition shadow-md disabled:opacity-50">Marked Checked-out</button>
+                <div className="mt-4 pt-4 border-t border-slate-300 grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-2 flex flex-col justify-end gap-2">
+                        <label className="text-slate-700 font-medium">Check-out Action</label>
+                        <button onClick={handleMarkCheckOut} disabled={!selectedBooking || !formData.checkedIn} className="w-full bg-green-600 text-white py-4 rounded hover:bg-green-700 font-bold transition shadow-md disabled:opacity-50">
+                            Check-Out
+                        </button>
                     </div>
-                    <div className="col-span-8">
+                    <div className="sm:col-span-8">
+                        <label className="text-slate-700 font-medium mb-1 block">Check-out Note</label>
                         <textarea
                             name="checkoutNote"
                             value={formData.checkoutNote}
@@ -744,8 +654,11 @@ export default function CheckInOut() {
                             className="w-full h-24 p-2 border border-slate-300 bg-white rounded resize-none disabled:bg-slate-50"
                         ></textarea>
                     </div>
-                    <div className="col-span-2 flex items-end">
-                        <button onClick={() => { setPrintMode('OUT_REGISTER'); setTimeout(() => window.print(), 100); }} disabled={viewMode !== 'VIEW'} className="w-full bg-slate-700 text-white py-8 rounded hover:bg-slate-800 font-bold transition leading-tight shadow-md disabled:opacity-50">Print Check Out Register</button>
+                    <div className="sm:col-span-2 flex flex-col justify-end gap-2">
+                        <label className="text-slate-700 font-medium">Reporting</label>
+                        <button onClick={() => { setPrintMode('OUT_REGISTER'); setTimeout(() => window.print(), 100); }} disabled={viewMode !== 'VIEW'} className="w-full bg-slate-700 text-white py-4 rounded hover:bg-slate-800 font-bold transition leading-tight shadow-md disabled:opacity-50">
+                            Print Reg
+                        </button>
                     </div>
                 </div>
             </div>

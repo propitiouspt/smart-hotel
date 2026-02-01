@@ -121,16 +121,16 @@ export default function Housekeeping() {
 
             {/* Admin Assignment Panel */}
             {!isStaff && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
                         <Plus className="w-4 h-4" /> Assign Task
                     </h3>
-                    <form onSubmit={handleAssign} className="flex gap-4 items-end">
-                        <div className="w-48">
+                    <form onSubmit={handleAssign} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                        <div className="lg:col-span-3">
                             <label className="block text-xs font-medium text-slate-500 mb-1">Room</label>
                             <select
                                 required
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
                                 value={assignForm.roomNo}
                                 onChange={e => setAssignForm({ ...assignForm, roomNo: e.target.value })}
                             >
@@ -140,11 +140,11 @@ export default function Housekeeping() {
                                 ))}
                             </select>
                         </div>
-                        <div className="w-48">
+                        <div className="lg:col-span-3">
                             <label className="block text-xs font-medium text-slate-500 mb-1">Staff</label>
                             <select
                                 required
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
                                 value={assignForm.userId}
                                 onChange={e => setAssignForm({ ...assignForm, userId: e.target.value })}
                             >
@@ -154,76 +154,80 @@ export default function Housekeeping() {
                                 ))}
                             </select>
                         </div>
-                        <div className="flex-1">
+                        <div className="lg:col-span-4">
                             <label className="block text-xs font-medium text-slate-500 mb-1">Memo</label>
                             <input
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
                                 placeholder="Instructions..."
                                 value={assignForm.assignMemo}
                                 onChange={e => setAssignForm({ ...assignForm, assignMemo: e.target.value })}
                             />
                         </div>
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700">
-                            Assign
-                        </button>
+                        <div className="lg:col-span-2">
+                            <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm">
+                                Assign Task
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}
 
             {/* Task List */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th className="px-6 py-4 font-semibold text-slate-700">Room</th>
-                            <th className="px-6 py-4 font-semibold text-slate-700">Staff</th>
-                            <th className="px-6 py-4 font-semibold text-slate-700">Instructions</th>
-                            <th className="px-6 py-4 font-semibold text-slate-700">Status</th>
-                            {isStaff && <th className="px-6 py-4 font-semibold text-slate-700 text-right">Action</th>}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {tasks.filter(t => isStaff ? t.userId === currentUser.userId : true).map(task => (
-                            <tr
-                                key={task.taskId}
-                                className={clsx(
-                                    "hover:bg-blue-50 cursor-pointer transition",
-                                    selectedTask?.taskId === task.taskId ? "bg-blue-100" : ""
-                                )}
-                                onClick={() => handleSelectTask(task)}
-                            >
-                                <td className="px-6 py-4 font-bold text-slate-800">{task.roomNo}</td>
-                                <td className="px-6 py-4 text-slate-600">{task.userName}</td>
-                                <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{task.assignMemo || '-'}</td>
-                                <td className="px-6 py-4">
-                                    {task.endStat === 'Ready' ? (
-                                        <span className="inline-flex items-center gap-1 text-green-600 font-medium">
-                                            <Check className="w-4 h-4" /> Ready
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center gap-1 text-orange-500 font-medium font-bold">
-                                            <Clock className="w-4 h-4" /> Pending
-                                        </span>
-                                    )}
-                                </td>
-                                {isStaff && (
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            className="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700"
-                                        >
-                                            {task.endStat === 'Ready' ? 'View Details' : 'Do Cleaning'}
-                                        </button>
-                                    </td>
-                                )}
-                            </tr>
-                        ))}
-                        {tasks.length === 0 && (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-[600px]">
+                        <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-slate-400">No active tasks</td>
+                                <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Room</th>
+                                <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Staff</th>
+                                <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Instructions</th>
+                                <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Status</th>
+                                {isStaff && <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700 text-right">Action</th>}
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {tasks.filter(t => isStaff ? t.userId === currentUser.userId : true).map(task => (
+                                <tr
+                                    key={task.taskId}
+                                    className={clsx(
+                                        "hover:bg-blue-50 cursor-pointer transition",
+                                        selectedTask?.taskId === task.taskId ? "bg-blue-100" : ""
+                                    )}
+                                    onClick={() => handleSelectTask(task)}
+                                >
+                                    <td className="px-4 sm:px-6 py-4 font-bold text-slate-800">{task.roomNo}</td>
+                                    <td className="px-4 sm:px-6 py-4 text-slate-600">{task.userName}</td>
+                                    <td className="px-4 sm:px-6 py-4 text-slate-500 max-w-[150px] sm:max-w-xs truncate">{task.assignMemo || '-'}</td>
+                                    <td className="px-4 sm:px-6 py-4">
+                                        {task.endStat === 'Ready' ? (
+                                            <span className="inline-flex items-center gap-1 text-green-600 font-medium whitespace-nowrap">
+                                                <Check className="w-4 h-4" /> Ready
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-orange-500 font-medium font-bold whitespace-nowrap">
+                                                <Clock className="w-4 h-4" /> Pending
+                                            </span>
+                                        )}
+                                    </td>
+                                    {isStaff && (
+                                        <td className="px-4 sm:px-6 py-4 text-right">
+                                            <button
+                                                className="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-700 transition"
+                                            >
+                                                {task.endStat === 'Ready' ? 'View' : 'Clean'}
+                                            </button>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+                            {tasks.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-slate-400">No active tasks</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {/* Staff Detailed View Modal */}
             {selectedTask && (

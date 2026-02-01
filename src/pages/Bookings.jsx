@@ -197,36 +197,36 @@ export default function Bookings() {
     return (
         <div className="space-y-4 max-w-[1400px] mx-auto">
             {/* Header / Top Actions - HIDDEN ON PRINT */}
-            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-200 print:hidden">
-                <h2 className="text-2xl font-bold text-slate-800">Advance Bookings</h2>
-                <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-lg border border-slate-200 gap-4 print:hidden">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Advance Bookings</h2>
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     <button
                         type="button"
                         onClick={handleNew}
                         disabled={viewMode === 'NEW' || viewMode === 'EDIT'}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded border border-blue-300 hover:bg-blue-200 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-100 text-blue-700 px-3 py-2 rounded border border-blue-300 hover:bg-blue-200 transition text-sm font-medium disabled:opacity-50"
                     >
                         <Plus className="w-4 h-4" />
-                        New Booking
+                        New
                     </button>
                     <button
                         onClick={() => setShowFilters(true)}
-                        className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-900 transition font-bold shadow-md"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-3 py-2 rounded border border-slate-700 hover:bg-slate-900 transition text-sm font-bold"
                     >
                         <Filter className="w-4 h-4 text-cyan-400" />
-                        Filter Options
+                        Filter
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={viewMode === 'VIEW'}
-                        className="flex items-center gap-2 bg-green-200 text-green-800 px-6 py-2 rounded border border-green-400 hover:bg-green-300 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-200 text-green-800 px-3 py-2 rounded border border-green-400 hover:bg-green-300 transition text-sm font-medium disabled:opacity-50"
                     >
                         <Save className="w-4 h-4" />
-                        Save Booking
+                        Save
                     </button>
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-2 bg-red-200 text-red-800 px-6 py-2 rounded border border-red-300 hover:bg-red-300 transition font-medium"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-200 text-red-800 px-3 py-2 rounded border border-red-300 hover:bg-red-300 transition text-sm font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back
@@ -235,107 +235,134 @@ export default function Bookings() {
             </div>
 
             {/* Main Form Area - HIDDEN ON PRINT */}
-            <div className="bg-slate-100 p-6 rounded-lg border border-slate-300 shadow-sm print:hidden">
-                <form className="grid gap-y-3 gap-x-6 text-sm" autoComplete="off">
-                    {/* Row 1 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Booking Id</label>
-                        <input name="bookingId" value={formData.bookingId} readOnly className="col-span-3 px-2 py-1 border border-slate-300 bg-white rounded bg-slate-50" />
-                        <label className="col-span-1 text-slate-700 font-medium">Channel</label>
-                        <select name="channel" value={formData.channel} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500">
+            <div className="bg-slate-100 p-4 sm:p-6 rounded-lg border border-slate-300 shadow-sm print:hidden">
+                <form className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 text-sm" autoComplete="off">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Booking Id</label>
+                        <input name="bookingId" value={formData.bookingId} readOnly className="px-2 py-1.5 border border-slate-300 bg-white rounded bg-slate-50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Channel</label>
+                        <select name="channel" value={formData.channel} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100">
                             <option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Expedia</option>
                         </select>
-                        <label className="col-span-1 text-slate-700 font-medium whitespace-nowrap">Booking Date</label>
-                        <input type="date" name="bookingDate" value={formData.bookingDate} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-1 text-slate-700 font-medium">Nationality</label>
-                        <input name="nationality" value={formData.nationality} onChange={handleChange} disabled={isFormDisabled} className="col-span-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold text-red-600">Booking Date</label>
+                        <input type="date" name="bookingDate" value={formData.bookingDate} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Nationality</label>
+                        <input name="nationality" value={formData.nationality} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
 
-                    {/* Row 2 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Main Guest</label>
-                        <input name="mainGuestName" value={formData.mainGuestName} onChange={handleChange} disabled={isFormDisabled} className="col-span-5 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-1 text-slate-700 font-medium">Check in dt.</label>
-                        <div className="col-span-2 flex gap-1"><input type="date" name="checkInDate" value={formData.checkInDate} onChange={handleChange} disabled={isFormDisabled} className="w-full px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" /></div>
-                        <label className="col-span-1 text-slate-700 font-medium">Check out dt.</label>
-                        <div className="col-span-2 flex gap-1"><input type="date" name="checkOutDate" value={formData.checkOutDate} onChange={handleChange} disabled={isFormDisabled} className="w-full px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" /></div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Main Guest</label>
+                        <input name="mainGuestName" value={formData.mainGuestName} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Check in dt.</label>
+                        <input type="date" name="checkInDate" value={formData.checkInDate} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Check out dt.</label>
+                        <input type="date" name="checkOutDate" value={formData.checkOutDate} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
 
-                    {/* Row 3 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Total Guest</label>
-                        <div className="col-span-5 flex items-center gap-2">
-                            <input type="number" name="totalGuests" value={formData.totalGuests} onChange={handleChange} disabled={isFormDisabled} className="w-16 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                            <label className="text-slate-700 font-medium">Childrens</label>
-                            <input type="number" name="children" value={formData.children} onChange={handleChange} disabled={isFormDisabled} className="w-16 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                            <label className="text-slate-700 font-medium">Age</label>
-                            <input name="childrenAges" value={formData.childrenAges} onChange={handleChange} disabled={isFormDisabled} placeholder="e.g. 5, 8" className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        </div>
-                        <label className="col-span-1 text-slate-700 font-medium">Room Type</label>
-                        <select name="roomType" value={formData.roomType} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Total Guest</label>
+                        <input type="number" name="totalGuests" value={formData.totalGuests} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Childrens</label>
+                        <input type="number" name="children" value={formData.children} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Age</label>
+                        <input name="childrenAges" value={formData.childrenAges} onChange={handleChange} disabled={isFormDisabled} placeholder="e.g. 5, 8" className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Room Type</label>
+                        <select name="roomType" value={formData.roomType} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100">
                             <option value="T0">T0 (Single)</option><option value="T1">T1 (Double)</option><option value="T1F">T1F (Family)</option><option value="T2">T2 (Suite)</option>
                         </select>
-                        <label className="col-span-1 text-slate-700 font-medium">No. of Nights</label>
-                        <input value={formData.nights} readOnly className="col-span-2 px-2 py-1 bg-green-500 text-white font-bold rounded text-center" />
                     </div>
 
-                    {/* Row 4 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">Total Booking Amount</label>
-                        <input type="number" name="totalBookingAmount" value={formData.totalBookingAmount} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Commision % & Amt</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input type="number" name="commissionPercent" placeholder="%" value={formData.commissionPercent} onChange={handleChange} disabled={isFormDisabled} className="w-1/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                            <input type="number" name="commissionAmount" placeholder="Amt" value={formData.commissionAmount} onChange={handleChange} disabled={isFormDisabled} className="w-2/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        </div>
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Tax % & Amount</label>
-                        <div className="col-span-2 flex gap-1">
-                            <input type="number" name="taxPercent" placeholder="%" value={formData.taxPercent} onChange={handleChange} disabled={isFormDisabled} className="w-1/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                            <input type="number" name="taxAmount" placeholder="Amt" value={formData.taxAmount} onChange={handleChange} disabled={isFormDisabled} className="w-2/3 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">No. of Nights</label>
+                        <input value={formData.nights} readOnly className="px-2 py-1.5 bg-green-500 text-white font-bold rounded text-center" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Total Booking Amount</label>
+                        <input type="number" name="totalBookingAmount" value={formData.totalBookingAmount} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Commision %</label>
+                        <input type="number" name="commissionPercent" placeholder="%" value={formData.commissionPercent} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Commision Amt</label>
+                        <input type="number" name="commissionAmount" placeholder="Amt" value={formData.commissionAmount} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
 
-                    {/* Row 5 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">City Tax Amount</label>
-                        <input type="number" name="cityTax" value={formData.cityTax} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Security Deposite</label>
-                        <input type="number" name="securityDeposit" value={formData.securityDeposit} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Mode</label>
-                        <select name="paymentMode" value={formData.paymentMode} onChange={handleChange} disabled={isFormDisabled} className="col-span-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium text-red-600 font-bold">Tax %</label>
+                        <input type="number" name="taxPercent" placeholder="%" value={formData.taxPercent} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Tax Amount</label>
+                        <input type="number" name="taxAmount" placeholder="Amt" value={formData.taxAmount} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">City Tax Amount</label>
+                        <input type="number" name="cityTax" value={formData.cityTax} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Security Deposite</label>
+                        <input type="number" name="securityDeposit" value={formData.securityDeposit} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Payment Mode</label>
+                        <select name="paymentMode" value={formData.paymentMode} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100">
                             <option value="">Select</option><option value="Cash">Cash</option><option value="Bank Trf">Bank Trf</option><option value="Card">Card</option>
                         </select>
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Collected by</label>
-                        <input name="collectedBy" value={formData.collectedBy} onChange={handleChange} disabled={isFormDisabled} className="col-span-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
                     </div>
-
-                    {/* Row 6 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-3 text-slate-700 font-medium">Direct Booking Payment mode</label>
-                        <select name="directPaymentMode" value={formData.directPaymentMode} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Collected by</label>
+                        <input name="collectedBy" value={formData.collectedBy} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Direct Pay Mode</label>
+                        <select name="directPaymentMode" value={formData.directPaymentMode} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100">
                             <option value="">Select</option><option value="Cash">Cash</option><option value="Bank Trf">Bank Trf</option><option value="Card">Card</option>
                         </select>
-                        <label className="col-span-2 text-slate-700 font-medium text-right pr-2">Payout Received</label>
-                        <input type="number" name="payoutReceived" value={formData.payoutReceived} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Received by</label>
-                        <input name="receivedBy" value={formData.receivedBy} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Payout Received</label>
+                        <input type="number" name="payoutReceived" value={formData.payoutReceived} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
 
-                    {/* Row 7 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-1 text-slate-700 font-medium">Arrival time</label>
-                        <input type="time" name="arrivalTime" value={formData.arrivalTime} onChange={handleChange} disabled={isFormDisabled} className="col-span-2 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        <label className="col-span-1 text-slate-700 font-medium text-right pr-2">Remarks</label>
-                        <input name="remarks" value={formData.remarks} onChange={handleChange} disabled={isFormDisabled} className="col-span-8 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium font-bold text-red-600">Received by</label>
+                        <input name="receivedBy" value={formData.receivedBy} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-slate-700 font-medium">Arrival time</label>
+                        <input type="time" name="arrivalTime" value={formData.arrivalTime} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Remarks</label>
+                        <input name="remarks" value={formData.remarks} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
 
-                    {/* Row 8 */}
-                    <div className="grid grid-cols-12 gap-4 items-center">
-                        <label className="col-span-2 text-slate-700 font-medium">Contact No. & Email</label>
-                        <div className="col-span-10 flex gap-4">
-                            <input name="contactPhone" placeholder="Phone Number" value={formData.contactPhone} onChange={handleChange} disabled={isFormDisabled} className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                            <input name="contactEmail" placeholder="Email Address" value={formData.contactEmail} onChange={handleChange} disabled={isFormDisabled} className="flex-1 px-2 py-1 border border-slate-300 bg-white rounded disabled:bg-slate-100 disabled:text-slate-500" />
-                        </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Contact No.</label>
+                        <input name="contactPhone" placeholder="Phone Number" value={formData.contactPhone} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
+                    </div>
+                    <div className="flex flex-col gap-1 sm:col-span-2">
+                        <label className="text-slate-700 font-medium">Email Address</label>
+                        <input name="contactEmail" placeholder="Email Address" value={formData.contactEmail} onChange={handleChange} disabled={isFormDisabled} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100" />
                     </div>
                 </form>
             </div>
@@ -399,43 +426,19 @@ export default function Bookings() {
                                 </tr>
                             )}
                         </tbody>
-                        <tfoot className="bg-slate-200 font-bold border-t-2 border-slate-400">
-                            <tr>
-                                <td className="px-4 py-2 border-r border-slate-300">Count: {bookings.length}</td>
-                                <td colSpan={5} className="px-4 py-2 border-r border-slate-300 text-right">Page Total:</td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.nights) || 0), 0)}
-                                </td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.totalBookingAmount) || 0), 0).toFixed(2)}
-                                </td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.commissionAmount) || 0), 0).toFixed(2)}
-                                </td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.taxAmount) || 0), 0).toFixed(2)}
-                                </td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.cityTax) || 0), 0).toFixed(2)}
-                                </td>
-                                <td className="px-4 py-2 border-r border-slate-300">
-                                    {bookings.reduce((sum, b) => sum + (Number(b.payoutReceived) || 0), 0).toFixed(2)}
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
+
                     </table>
                 </div>
             </div>
 
             {/* Bottom Actions - Actions for Selected Booking - HIDDEN ON PRINT */}
-            <div className="flex gap-4 mt-2 print:hidden">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-2 print:hidden">
                 <button
                     onClick={handleEditSelected}
                     disabled={!selectedBooking || viewMode === 'NEW' || viewMode === 'EDIT'}
-                    className="flex-1 bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition text-sm font-medium disabled:opacity-50"
                 >
-                    Edit selected Booking
+                    Edit
                 </button>
                 <button
                     onClick={() => {
@@ -443,9 +446,9 @@ export default function Bookings() {
                         setTimeout(() => window.print(), 100);
                     }}
                     disabled={!selectedBooking}
-                    className="flex-1 bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition text-sm font-medium disabled:opacity-50"
                 >
-                    Print Single Booking
+                    Print Single
                 </button>
                 <button
                     onClick={() => {
@@ -453,16 +456,16 @@ export default function Bookings() {
                         setTimeout(() => window.print(), 100);
                     }}
                     disabled={viewMode === 'NEW' || viewMode === 'EDIT'}
-                    className="flex-1 bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-300 text-blue-900 px-4 py-2 rounded hover:bg-blue-400 transition text-sm font-medium disabled:opacity-50"
                 >
-                    Print Booking Register
+                    Print Register
                 </button>
                 <button
                     onClick={handleDelete}
                     disabled={!selectedBooking || viewMode === 'NEW' || viewMode === 'EDIT'}
-                    className="flex-1 bg-red-200 text-red-900 px-4 py-2 rounded hover:bg-red-300 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-red-200 text-red-900 px-4 py-2 rounded hover:bg-red-300 transition text-sm font-medium disabled:opacity-50 font-bold"
                 >
-                    delete selected Booking
+                    Delete Selected
                 </button>
             </div>
 

@@ -123,31 +123,31 @@ export default function Reports() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center no-print">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 no-print">
                 <h2 className="text-2xl font-bold text-slate-800">Reports</h2>
-                <div className="flex gap-2">
-                    <button onClick={() => setShowFilters(true)} className="flex items-center gap-2 bg-slate-800 text-white px-4 py-1.5 rounded-lg hover:bg-slate-900 transition text-sm font-bold shadow-md">
-                        <Filter className="w-4 h-4 text-cyan-400" /> Filter Options
+                <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+                    <button onClick={() => setShowFilters(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-1.5 rounded-lg hover:bg-slate-900 transition text-sm font-bold shadow-md">
+                        <Filter className="w-4 h-4 text-cyan-400" /> Filters
                     </button>
-                    <button onClick={handlePrint} className="flex items-center gap-2 bg-slate-200 text-slate-700 px-3 py-1.5 rounded hover:bg-slate-300 transition text-sm font-medium">
+                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-slate-200 text-slate-700 px-3 py-1.5 rounded hover:bg-slate-300 transition text-sm font-medium">
                         <Eye className="w-4 h-4" /> Preview
                     </button>
-                    <button onClick={handlePrint} className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-sm font-medium">
-                        <Printer className="w-4 h-4" /> Print to Default
+                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-sm font-medium">
+                        <Printer className="w-4 h-4" /> Print
                     </button>
-                    <button onClick={handlePrint} className="flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition text-sm font-medium">
-                        <FileText className="w-4 h-4" /> Print PDF
+                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition text-sm font-medium">
+                        <FileText className="w-4 h-4" /> PDF
                     </button>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-slate-200 no-print">
+            <div className="flex flex-wrap gap-4 border-b border-slate-200 no-print">
                 <button
                     onClick={() => setActiveTab('season')}
                     className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'season' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                    Collection Report (Season Data)
+                    Collection Report
                 </button>
                 <button
                     onClick={() => setActiveTab('mis')}
@@ -224,7 +224,7 @@ export default function Reports() {
                             <p className="text-sm font-bold text-slate-500">Date: {format(new Date(), 'dd-MMM-yyyy')}</p>
                         </div>
                         {/* Reuse existing MIS UI */}
-                        <div className="grid grid-cols-3 gap-6 text-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                             <div className="p-4 bg-blue-50 rounded-xl">
                                 <div className="text-3xl font-bold text-blue-600">{mis.occupied.length}</div>
                                 <div className="text-sm text-blue-600/80">Rooms Occupied</div>
@@ -239,55 +239,57 @@ export default function Reports() {
                             </div>
                         </div>
                         <div className="border border-slate-100 rounded-lg overflow-hidden">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 border-b border-slate-200">
-                                    <tr>
-                                        <th className="px-4 py-3">Room</th>
-                                        <th className="px-4 py-3">Type</th>
-                                        <th className="px-4 py-3">Status</th>
-                                        <th className="px-4 py-3">Guest</th>
-                                        <th className="px-4 py-3 text-right">Current Rate</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {rooms.map(r => (
-                                        <tr key={r.roomNo}>
-                                            <td className="px-4 py-3 font-medium">{r.roomNo}</td>
-                                            <td className="px-4 py-3">{r.roomType}</td>
-                                            <td className="px-4 py-3">
-                                                <span className={`text-xs px-2 py-1 rounded-full ${r.statusOfRoom === 'Occupied' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                    {r.statusOfRoom}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3">{r.currentGuest || '-'}</td>
-                                            <td className="px-4 py-3 text-right">{r.currentRate}</td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm min-w-[600px]">
+                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                        <tr>
+                                            <th className="px-4 py-3">Room</th>
+                                            <th className="px-4 py-3">Type</th>
+                                            <th className="px-4 py-3">Status</th>
+                                            <th className="px-4 py-3">Guest</th>
+                                            <th className="px-4 py-3 text-right">Current Rate</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot className="bg-cyan-100 border-t-2 border-cyan-500">
-                                    <tr className="font-bold text-slate-900">
-                                        <td colSpan={2} className="px-4 py-4 text-xl uppercase tracking-tighter">Todays Summury</td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs text-slate-500 uppercase">Rooms Occupied</span>
-                                                <span className="text-lg text-red-600">{mis.occupied.length}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs text-slate-500 uppercase">Rooms Available</span>
-                                                <span className="text-lg text-green-600">{mis.available.length}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4 text-right">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs text-slate-500 uppercase">Today's Revenue</span>
-                                                <span className="text-2xl text-blue-800 font-black">${mis.revenue.toLocaleString()}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {rooms.map(r => (
+                                            <tr key={r.roomNo}>
+                                                <td className="px-4 py-3 font-medium">{r.roomNo}</td>
+                                                <td className="px-4 py-3">{r.roomType}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${r.statusOfRoom === 'Occupied' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                        {r.statusOfRoom}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">{r.currentGuest || '-'}</td>
+                                                <td className="px-4 py-3 text-right">{r.currentRate}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot className="bg-cyan-100 border-t-2 border-cyan-500">
+                                        <tr className="font-bold text-slate-900">
+                                            <td colSpan={2} className="px-4 py-4 text-xl uppercase tracking-tighter">Todays Summury</td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-slate-500 uppercase">Rooms Occupied</span>
+                                                    <span className="text-lg text-red-600">{mis.occupied.length}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-slate-500 uppercase">Rooms Available</span>
+                                                    <span className="text-lg text-green-600">{mis.available.length}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 text-right">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-slate-500 uppercase">Today's Revenue</span>
+                                                    <span className="text-2xl text-blue-800 font-black">${mis.revenue.toLocaleString()}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}

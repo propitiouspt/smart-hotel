@@ -116,63 +116,65 @@ export default function Users() {
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-slate-800">User Master</h2>
                 {currentUser.userType === 'Admin' && (
                     <button
                         onClick={handleOpenSettings}
-                        className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition shadow-md font-bold"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition shadow-md font-bold"
                     >
                         <Settings size={18} className="text-cyan-400" /> Entity Settings
                     </button>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* List Column */}
-                <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th className="px-4 py-3 font-semibold text-slate-700">User ID</th>
-                                <th className="px-4 py-3 font-semibold text-slate-700">Name</th>
-                                <th className="px-4 py-3 font-semibold text-slate-700">Type</th>
-                                <th className="px-4 py-3 font-semibold text-slate-700">Active</th>
-                                <th className="px-4 py-3 font-semibold text-slate-700 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {users.map(user => (
-                                <tr
-                                    key={user.userId}
-                                    onClick={() => handleSelect(user)}
-                                    className={`cursor-pointer hover:bg-slate-50 transition ${selectedUser?.userId === user.userId ? 'bg-blue-50' : ''}`}
-                                >
-                                    <td className="px-4 py-3 font-medium text-slate-900">{user.userId}</td>
-                                    <td className="px-4 py-3">{user.userName}</td>
-                                    <td className="px-4 py-3 text-slate-500">{user.userType}</td>
-                                    <td className="px-4 py-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                            {user.active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDelete(user.userId); }}
-                                            className="text-red-500 hover:text-red-700 p-1 rounded"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm min-w-[500px]">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-4 py-3 font-semibold text-slate-700">User ID</th>
+                                    <th className="px-4 py-3 font-semibold text-slate-700">Name</th>
+                                    <th className="px-4 py-3 font-semibold text-slate-700">Type</th>
+                                    <th className="px-4 py-3 font-semibold text-slate-700">Active</th>
+                                    <th className="px-4 py-3 font-semibold text-slate-700 text-right">Action</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {users.map(user => (
+                                    <tr
+                                        key={user.userId}
+                                        onClick={() => handleSelect(user)}
+                                        className={`cursor-pointer hover:bg-slate-50 transition ${selectedUser?.userId === user.userId ? 'bg-blue-50' : ''}`}
+                                    >
+                                        <td className="px-4 py-3 font-medium text-slate-900">{user.userId}</td>
+                                        <td className="px-4 py-3">{user.userName}</td>
+                                        <td className="px-4 py-3 text-slate-500">{user.userType}</td>
+                                        <td className="px-4 py-3">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                {user.active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(user.userId); }}
+                                                className="text-red-500 hover:text-red-700 p-1 rounded"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {/* Form Column */}
-                <div className="md:col-span-1">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 sticky top-6">
+                <div className="lg:col-span-1">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:sticky lg:top-6">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg text-slate-800">{isEdit ? 'Edit User' : 'New User'}</h3>
                             <button
@@ -317,7 +319,7 @@ export default function Users() {
                                     required
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-tight">Contact No</label>
                                     <input
@@ -328,7 +330,7 @@ export default function Users() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-tight">VAT / Registration No</label>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-tight">VAT / Reg No</label>
                                     <input
                                         className="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
                                         value={hotelSettings.vatNo}
