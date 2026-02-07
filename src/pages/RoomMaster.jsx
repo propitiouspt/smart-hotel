@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/db';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Save, Plus } from 'lucide-react';
+import { useDevice } from '../hooks/useDevice';
+import { Trash2, Save, Plus, X } from 'lucide-react';
 import clsx from 'clsx';
+import { MessageModal, ConfirmModal } from '../components/Modal';
 
 export default function RoomMaster() {
     const { currentUser } = useAuth();
+    const { isMobile, isTablet } = useDevice();
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
+    const [viewMode, setViewMode] = useState('VIEW'); // 'VIEW', 'NEW', 'EDIT'
+
+    // Modal State
+    const [messageModal, setMessageModal] = useState({ show: false, message: '', title: 'System Message' });
+    const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
 
     // Form State
     const initialForm = {
@@ -34,13 +42,29 @@ export default function RoomMaster() {
 
     // Handlers
     const handleSelect = (room) => {
+        if (viewMode !== 'VIEW') return;
         setSelectedRoom(room);
         setFormData(room);
+    };
+
+    const handleEdit = () => {
+        if (!selectedRoom) return;
+        setViewMode('EDIT');
     };
 
     const handleNew = () => {
         setSelectedRoom(null);
         setFormData(initialForm);
+        setViewMode('NEW');
+    };
+
+    const handleDiscard = () => {
+        setViewMode('VIEW');
+        if (selectedRoom) {
+            setFormData(selectedRoom);
+        } else {
+            setFormData(initialForm);
+        }
     };
 
     const handleChange = (e) => {
@@ -52,34 +76,59 @@ export default function RoomMaster() {
         e.preventDefault();
         db.rooms.save({ ...formData, hotelId: currentUser.hotelId });
         loadRooms();
-        handleNew();
+        setViewMode('VIEW');
+        setMessageModal({ show: true, message: 'Room details saved successfully!', title: 'System Message' });
     };
 
     const handleDelete = () => {
-        if (confirm('Are you sure you want to delete this room?')) {
-            db.rooms.delete(formData.roomNo, currentUser.hotelId);
-            loadRooms();
-            handleNew();
-        }
+        setConfirmModal({
+            show: true,
+            message: 'Are you sure you want to delete this room?',
+            onConfirm: () => {
+                db.rooms.delete(formData.roomNo, currentUser.hotelId);
+                loadRooms();
+                setSelectedRoom(null);
+                setFormData(initialForm);
+                setViewMode('VIEW');
+                setMessageModal({ show: true, message: 'Room deleted successfully.', title: 'System Message' });
+            }
+        });
     };
+
+    const isFormDisabled = viewMode === 'VIEW';
+    const isTableLocked = viewMode !== 'VIEW';
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-2xl font-bold text-slate-800">Room Master</h2>
-                <button
-                    onClick={handleNew}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm font-bold"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add New Room
-                </button>
+                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-800`}>Room Master</h2>
+                <div className="flex gap-2 w-full sm:w-auto">
+                    <button
+                        onClick={handleNew}
+                        disabled={viewMode !== 'VIEW'}
+                        className={`${isMobile ? 'flex-1 px-3 py-1.5 text-sm' : 'w-auto px-4 py-2'} flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm font-bold disabled:opacity-50`}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add New Room
+                    </button>
+                    {selectedRoom && viewMode === 'VIEW' && (
+                        <button
+                            onClick={handleEdit}
+                            className={`${isMobile ? 'flex-1 px-3 py-1.5 text-sm' : 'w-auto px-4 py-2'} flex items-center justify-center gap-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition shadow-sm font-bold`}
+                        >
+                            Edit Room
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* List */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className={clsx(
+                    "lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-opacity",
+                    isTableLocked && "opacity-50 pointer-events-none"
+                )}>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm min-w-[500px]">
                             <thead className="bg-slate-50 border-b border-slate-200">
@@ -128,11 +177,11 @@ export default function RoomMaster() {
                 </div>
 
                 {/* Form */}
-                <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit lg:sticky lg:top-6">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">
-                        {selectedRoom ? `Edit Room ${selectedRoom.roomNo}` : 'New Room'}
+                <div className={`lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 ${isMobile ? 'p-4' : 'p-6'} h-fit lg:sticky lg:top-6`}>
+                    <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold text-slate-800 mb-4`}>
+                        {viewMode === 'NEW' ? 'New Room' : viewMode === 'EDIT' ? `Edit Room ${formData.roomNo}` : selectedRoom ? `Room ${selectedRoom.roomNo} Details` : 'Select a room'}
                     </h3>
-                    <form onSubmit={handleSave} className="space-y-4">
+                    <form onSubmit={handleSave} className="space-y-4 text-sm">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-medium text-slate-500 mb-1">Room No</label>
@@ -140,8 +189,8 @@ export default function RoomMaster() {
                                     name="roomNo"
                                     value={formData.roomNo}
                                     onChange={handleChange}
-                                    disabled={!!selectedRoom} // Lock ID on edit
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    disabled={isFormDisabled || viewMode === 'EDIT'} // Lock ID on edit
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                                     required
                                 />
                             </div>
@@ -151,7 +200,8 @@ export default function RoomMaster() {
                                     name="floor"
                                     value={formData.floor}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    disabled={isFormDisabled}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                                 />
                             </div>
                         </div>
@@ -162,7 +212,8 @@ export default function RoomMaster() {
                                 name="roomType"
                                 value={formData.roomType}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                disabled={isFormDisabled}
+                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                             >
                                 <option value="T0">T0 (Single)</option>
                                 <option value="T1">T1 (Double)</option>
@@ -178,7 +229,8 @@ export default function RoomMaster() {
                                 name="basicRate"
                                 value={formData.basicRate}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                disabled={isFormDisabled}
+                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                                 required
                             />
                         </div>
@@ -190,7 +242,8 @@ export default function RoomMaster() {
                                     name="statusOfRoom"
                                     value={formData.statusOfRoom}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    disabled={isFormDisabled}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                                 >
                                     <option>Available</option>
                                     <option>Occupied</option>
@@ -203,7 +256,8 @@ export default function RoomMaster() {
                                     name="cleaningStatus"
                                     value={formData.cleaningStatus}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    disabled={isFormDisabled}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50"
                                 >
                                     <option>Ready</option>
                                     <option>Dirty</option>
@@ -225,27 +279,57 @@ export default function RoomMaster() {
                         </div>
 
                         <div className="flex gap-2 pt-2">
-                            <button
-                                type="submit"
-                                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex justify-center items-center gap-2"
-                            >
-                                <Save className="w-4 h-4" />
-                                Save
-                            </button>
-
-                            {currentUser.userType === 'Admin' && selectedRoom && (
+                            {!isFormDisabled ? (
+                                <>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 font-bold"
+                                    >
+                                        <Save className="w-4 h-4" />
+                                        Save
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleDiscard}
+                                        className="flex-1 bg-slate-200 text-slate-700 py-2 rounded-lg hover:bg-slate-300 transition flex justify-center items-center gap-2 font-medium"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        Discard
+                                    </button>
+                                </>
+                            ) : currentUser.userType === 'Admin' && selectedRoom && (
                                 <button
                                     type="button"
                                     onClick={handleDelete}
-                                    className="px-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
+                                    className="w-full bg-red-100 text-red-600 py-2 rounded-lg hover:bg-red-200 transition flex justify-center items-center gap-2 font-bold"
                                 >
                                     <Trash2 className="w-4 h-4" />
+                                    Delete Room
                                 </button>
                             )}
                         </div>
                     </form>
                 </div>
             </div>
+
+            {/* Modals */}
+            <MessageModal
+                show={messageModal.show}
+                title={messageModal.title}
+                message={messageModal.message}
+                onOk={() => setMessageModal({ ...messageModal, show: false })}
+            />
+
+            <ConfirmModal
+                show={confirmModal.show}
+                title="System Message"
+                message={confirmModal.message}
+                onConfirm={() => {
+                    confirmModal.onConfirm?.();
+                    setConfirmModal({ ...confirmModal, show: false });
+                }}
+                onCancel={() => setConfirmModal({ ...confirmModal, show: false })}
+            />
         </div>
     );
 }

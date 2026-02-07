@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDevice } from '../hooks/useDevice';
+import { db } from '../services/db';
 import {
     LayoutDashboard,
     BedDouble,
@@ -13,22 +15,28 @@ import {
     Menu,
     X,
     LogOut,
-    User
+    User,
+    Boxes,
+    WashingMachine,
+    FileText,
+    Banknote,
 } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Navbar() {
     const { currentUser, logout } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const { isMobile, isTablet, width } = useDevice();
     const navigate = useNavigate();
     const role = currentUser?.userType;
+    const hotelSettings = db.settings.get(currentUser?.hotelId || 'H001');
 
     const links = [
         {
             to: '/',
             label: 'Dashboard',
             icon: LayoutDashboard,
-            roles: ['Admin', 'Manager']
+            roles: ['Admin', 'Manager', 'Investors']
         },
         {
             to: '/rooms',
@@ -55,10 +63,28 @@ export default function Navbar() {
             roles: ['Admin', 'Manager', 'Staff']
         },
         {
+            to: '/inventory',
+            label: 'Inventory',
+            icon: Boxes,
+            roles: ['Admin', 'Manager']
+        },
+        {
+            to: '/laundry',
+            label: 'Laundry',
+            icon: WashingMachine,
+            roles: ['Admin', 'Manager']
+        },
+        {
+            to: '/petty-cash',
+            label: 'Petty Cash',
+            icon: Banknote,
+            roles: ['Admin', 'Manager']
+        },
+        {
             to: '/reports',
             label: 'Reports',
-            icon: FileBarChart,
-            roles: ['Admin', 'Manager']
+            icon: FileText,
+            roles: ['Admin', 'Manager', 'Investors']
         },
         {
             to: '/users',
@@ -88,67 +114,72 @@ export default function Navbar() {
                     {/* Logo and Desktop Links */}
                     <div className="flex items-center">
                         <div className="flex-shrink-0 flex items-center gap-2">
-                            <h1 className="text-xl font-bold text-white tracking-tight">Smart Hotel</h1>
+                            <h1 className="text-xl font-bold text-white tracking-tight">
+                                {hotelSettings?.entityName || 'Smart Hotel'}
+                            </h1>
                             <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-400 uppercase">
                                 {role}
                             </span>
                         </div>
-                        <div className="hidden lg:block ml-10">
-                            <div className="flex items-baseline space-x-4">
-                                {visibleLinks.map((link) => (
-                                    <NavLink
-                                        key={link.to}
-                                        to={link.to}
-                                        className={({ isActive }) => clsx(
-                                            "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                                            isActive
-                                                ? "bg-slate-800 text-white"
-                                                : "text-slate-300 hover:bg-slate-700 hover:text-white"
-                                        )}
-                                    >
-                                        <link.icon className="w-4 h-4" />
+                        <div className="hidden lg:flex items-center gap-3 ml-10">
+                            {visibleLinks.map((link) => (
+                                <NavLink
+                                    key={link.to}
+                                    to={link.to}
+                                    title={link.label}
+                                    className={({ isActive }) => clsx(
+                                        "flex items-center justify-center p-2 rounded-md transition-colors group relative",
+                                        isActive
+                                            ? "bg-slate-800 text-white"
+                                            : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                                    )}
+                                >
+                                    <link.icon className="w-5 h-5 text-current" />
+
+                                    {/* Tooltip */}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-[60] border border-slate-700 shadow-xl pointer-events-none">
                                         {link.label}
-                                    </NavLink>
-                                ))}
-                            </div>
+                                    </div>
+                                </NavLink>
+                            ))}
                         </div>
                     </div>
+                </div>
 
-                    {/* Desktop Profile & Logout */}
-                    <div className="hidden lg:flex items-center gap-4">
-                        <div className="flex items-center gap-3 text-slate-300">
-                            <div className="text-right">
-                                <p className="text-sm font-medium text-white">{currentUser?.userName}</p>
-                                <p className="text-[10px] text-slate-500">{currentUser?.userId}</p>
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                                {currentUser?.userName.charAt(0)}
-                            </div>
+                {/* Desktop Profile & Logout */}
+                <div className="hidden lg:flex items-center gap-4">
+                    <div className="flex items-center gap-3 text-slate-300">
+                        <div className="text-right">
+                            <p className="text-sm font-medium text-white">{currentUser?.userName}</p>
+                            <p className="text-[10px] text-slate-500">{currentUser?.userId}</p>
                         </div>
-                        <button
-                            onClick={handleLogout}
-                            className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                            title="Logout"
-                        >
-                            <LogOut className="w-5 h-5" />
-                        </button>
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                            {currentUser?.userName.charAt(0)}
+                        </div>
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                        title="Logout"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                </div>
 
-                    {/* Mobile menu button */}
-                    <div className="lg:hidden flex items-center gap-4">
-                        <div className="flex items-center gap-2 mr-2">
-                            <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                                {currentUser?.userName.charAt(0)}
-                            </div>
+                {/* Mobile menu button */}
+                <div className="lg:hidden flex items-center gap-4">
+                    <div className="flex items-center gap-2 mr-2">
+                        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
+                            {currentUser?.userName.charAt(0)}
                         </div>
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
-                        >
-                            <span className="sr-only">Open main menu</span>
-                            {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
-                        </button>
                     </div>
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
+                    >
+                        <span className="sr-only">Open main menu</span>
+                        {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
+                    </button>
                 </div>
             </div>
 

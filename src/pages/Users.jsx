@@ -234,6 +234,7 @@ export default function Users() {
                                     <option value="Staff">Staff</option>
                                     <option value="Manager">Manager</option>
                                     <option value="Admin">Admin</option>
+                                    <option value="Investors">Investors</option>
                                 </select>
                             </div>
 

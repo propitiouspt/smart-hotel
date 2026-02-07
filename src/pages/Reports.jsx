@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/db';
 import { useAuth } from '../context/AuthContext';
+import { useDevice } from '../hooks/useDevice';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { Printer, FileText, Eye, Filter } from 'lucide-react';
 import FilterDialog from '../components/FilterDialog';
 
 export default function Reports() {
     const { currentUser } = useAuth();
-    const [activeTab, setActiveTab] = useState('season'); // Default to new tab as per request focus
+    const { isMobile, isTablet } = useDevice();
+    const isInvestor = currentUser?.userType === 'Investors';
+    const [activeTab, setActiveTab] = useState(isInvestor ? 'mis' : 'season'); // Default to MIS for Investors
     const [rooms, setRooms] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
@@ -124,18 +127,18 @@ export default function Reports() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 no-print">
-                <h2 className="text-2xl font-bold text-slate-800">Reports</h2>
-                <div className="flex flex-wrap gap-2 w-full lg:w-auto">
-                    <button onClick={() => setShowFilters(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-1.5 rounded-lg hover:bg-slate-900 transition text-sm font-bold shadow-md">
+                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-800`}>Reports</h2>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full lg:w-auto">
+                    <button onClick={() => setShowFilters(true)} className="flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition text-xs font-bold shadow-md">
                         <Filter className="w-4 h-4 text-cyan-400" /> Filters
                     </button>
-                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-slate-200 text-slate-700 px-3 py-1.5 rounded hover:bg-slate-300 transition text-sm font-medium">
+                    <button onClick={handlePrint} className="flex items-center justify-center gap-2 bg-slate-200 text-slate-700 px-3 py-2 rounded hover:bg-slate-300 transition text-xs font-medium">
                         <Eye className="w-4 h-4" /> Preview
                     </button>
-                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-sm font-medium">
+                    <button onClick={handlePrint} className="flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition text-xs font-medium">
                         <Printer className="w-4 h-4" /> Print
                     </button>
-                    <button onClick={handlePrint} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition text-sm font-medium">
+                    <button onClick={handlePrint} className="flex items-center justify-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition text-xs font-medium">
                         <FileText className="w-4 h-4" /> PDF
                     </button>
                 </div>
@@ -143,18 +146,36 @@ export default function Reports() {
 
             {/* Tabs */}
             <div className="flex flex-wrap gap-4 border-b border-slate-200 no-print">
-                <button
-                    onClick={() => setActiveTab('season')}
-                    className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'season' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                >
-                    Collection Report
-                </button>
+                {(currentUser?.userType === 'Admin' || currentUser?.userType === 'Manager' || currentUser?.userType === 'Investors') && (
+                    <button
+                        onClick={() => setActiveTab('season')}
+                        className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'season' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        Collection Report
+                    </button>
+                )}
                 <button
                     onClick={() => setActiveTab('mis')}
                     className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'mis' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                     Daily MIS
                 </button>
+                {!isInvestor && (
+                    <>
+                        <button
+                            onClick={() => setActiveTab('inventory')}
+                            className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'inventory' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            Inventory Reports
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('laundry')}
+                            className={`pb-3 px-1 font-medium text-sm transition ${activeTab === 'laundry' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            Laundry Reports
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* Content */}
@@ -170,8 +191,8 @@ export default function Reports() {
                                 Filtered: <span className="text-blue-600 font-bold">{appliedFilters.startDate}</span> to <span className="text-blue-600 font-bold">{appliedFilters.endDate}</span> | Channel: <span className="text-blue-600 font-bold">{appliedFilters.channel}</span>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm border-collapse border border-slate-300">
+                        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300">
+                            <table className={`w-full text-left ${isMobile ? 'text-[10px]' : 'text-sm'} border-collapse border border-slate-300 min-w-[600px] sm:min-w-full`}>
                                 <thead className="bg-cyan-400 text-black border-b border-slate-400 font-bold">
                                     <tr>
                                         <th className="px-4 py-2 border border-slate-300">Month</th>
@@ -210,6 +231,152 @@ export default function Reports() {
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'inventory' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center border-b pb-2 mb-2">
+                            <div className="flex flex-col">
+                                {hotelSettings && <h1 className="text-xl font-black text-blue-900 uppercase no-print-hidden">{hotelSettings.entityName}</h1>}
+                                <h3 className="font-bold text-lg text-slate-800">Inventory Summary & Transactions</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h4 className="font-bold text-sm text-slate-600 uppercase tracking-wider">Inventory Summary</h4>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm border-collapse border border-slate-300">
+                                    <thead className="bg-slate-800 text-white">
+                                        <tr>
+                                            <th className="px-4 py-2 border border-slate-300">Code</th>
+                                            <th className="px-4 py-2 border border-slate-300">Item Name</th>
+                                            <th className="px-4 py-2 border border-slate-300">Category</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Op. Stock</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Purchased</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Used</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Closing</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {db.inventory.master.getAll().map(item => (
+                                            <tr key={item.itemCode} className="hover:bg-slate-50">
+                                                <td className="px-4 py-2 border border-slate-300 font-mono">{item.itemCode}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-medium">{item.itemName}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-slate-500">{item.category}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right">{item.itemOpstock}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-green-600 font-bold">+{item.itemPur}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-red-600 font-bold">-{item.itemUsed}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right font-black text-blue-700">
+                                                    {(Number(item.itemOpstock) || 0) + (Number(item.itemPur) || 0) - (Number(item.itemUsed) || 0)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 mt-8">
+                            <h4 className="font-bold text-sm text-slate-600 uppercase tracking-wider">Recent Transactions</h4>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs border-collapse border border-slate-300">
+                                    <thead className="bg-slate-100">
+                                        <tr>
+                                            <th className="px-4 py-2 border border-slate-300">Date</th>
+                                            <th className="px-4 py-2 border border-slate-300">Item</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">In</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Out</th>
+                                            <th className="px-4 py-2 border border-slate-300">Remark</th>
+                                            <th className="px-4 py-2 border border-slate-300">User</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {db.inventory.transactions.getAll().slice(-20).reverse().map(trn => (
+                                            <tr key={trn.id}>
+                                                <td className="px-4 py-2 border border-slate-300">{trn.itemDate}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-medium">{trn.itemName}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-green-600">{trn.itemPurQty || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-red-600">{trn.itemUseQty || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 italic text-slate-500">{trn.remark || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-mono">{trn.user}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'laundry' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center border-b pb-2 mb-2">
+                            <div className="flex flex-col">
+                                {hotelSettings && <h1 className="text-xl font-black text-blue-900 uppercase no-print-hidden">{hotelSettings.entityName}</h1>}
+                                <h3 className="font-bold text-lg text-slate-800">Laundry Status & History</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h4 className="font-bold text-sm text-slate-600 uppercase tracking-wider">Linen Status Summary</h4>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm border-collapse border border-slate-300">
+                                    <thead className="bg-indigo-800 text-white">
+                                        <tr>
+                                            <th className="px-4 py-2 border border-slate-300">Code</th>
+                                            <th className="px-4 py-2 border border-slate-300">Description</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Dirty (Out)</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Clean (In)</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Net in Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {db.laundry.master.getAll().map(item => (
+                                            <tr key={item.itemCode} className="hover:bg-slate-50">
+                                                <td className="px-4 py-2 border border-slate-300 font-mono">{item.itemCode}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-medium">{item.itemName}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-red-600 font-bold">{item.itemQout}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-green-600 font-bold">{item.itemQin}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right font-black text-indigo-700">
+                                                    {(Number(item.itemQin) || 0) - (Number(item.itemQout) || 0)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 mt-8">
+                            <h4 className="font-bold text-sm text-slate-600 uppercase tracking-wider">Recent Laundry History</h4>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs border-collapse border border-slate-300">
+                                    <thead className="bg-slate-100">
+                                        <tr>
+                                            <th className="px-4 py-2 border border-slate-300">Date</th>
+                                            <th className="px-4 py-2 border border-slate-300">Item</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Clean In</th>
+                                            <th className="px-4 py-2 border border-slate-300 text-right">Dirty Out</th>
+                                            <th className="px-4 py-2 border border-slate-300">Status/Comments</th>
+                                            <th className="px-4 py-2 border border-slate-300">Staff</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {db.laundry.transactions.getAll().slice(-20).reverse().map(trn => (
+                                            <tr key={trn.id}>
+                                                <td className="px-4 py-2 border border-slate-300">{trn.itemDate}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-medium">{trn.itemName}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-green-600 font-bold">{trn.itemQin || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 text-right text-red-600 font-bold">{trn.itemQout || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 italic text-slate-500">{trn.itemStatus || '-'}</td>
+                                                <td className="px-4 py-2 border border-slate-300 font-mono">{trn.itemUser}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -30,7 +30,11 @@ export default function Backup() {
                 { data: bookings, name: 'Bookings' },
                 { data: tasks, name: 'Tasks' },
                 { data: users.map(({ password, ...u }) => u), name: 'Users' },
-                { data: [settings], name: 'Settings' }
+                { data: [settings], name: 'Settings' },
+                { data: db.inventory.master.getAll(), name: 'Inventory Master' },
+                { data: db.inventory.transactions.getAll(), name: 'Inventory Transactions' },
+                { data: db.laundry.master.getAll(), name: 'Laundry Master' },
+                { data: db.laundry.transactions.getAll(), name: 'Laundry Transactions' }
             ];
 
             sheets.forEach(sheet => {
@@ -46,7 +50,8 @@ export default function Backup() {
 
             // Generate filename
             const date = new Date().toISOString().split('T')[0];
-            const filename = `SmartHotel_Backup_${date}.xlsx`;
+            const entitySafe = (hotelSettings?.entityName || 'SmartHotel').replace(/[^a-z0-9]/gi, '_');
+            const filename = `${entitySafe}_Backup_${date}.xlsx`;
 
             // Export file
             XLSX.writeFile(wb, filename);
@@ -86,6 +91,8 @@ export default function Backup() {
                             <li>Task & Housekeeping Logs</li>
                             <li>User Accounts (excluding passwords)</li>
                             <li>General Hotel Settings</li>
+                            <li>Inventory Master & Transactions</li>
+                            <li>Laundry Master & Transactions</li>
                         </ul>
                     </div>
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">

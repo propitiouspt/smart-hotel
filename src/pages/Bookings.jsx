@@ -185,8 +185,29 @@ export default function Bookings() {
         }
     };
 
+    const handleBookingIdBlur = (e) => {
+        const newId = e.target.value;
+        if (!newId) return;
+
+        // Check for duplicates
+        const allBookings = db.bookings.find(b => b.hotelId === currentUser.hotelId);
+        const duplicate = allBookings.find(b => b.bookingId === newId && b.id !== formData.id);
+
+        if (duplicate) {
+            setMessageModal({
+                show: true,
+                message: 'This Booking ID already exists. Please enter a unique ID.',
+                title: 'System Message'
+            });
+            setFormData(prev => ({ ...prev, bookingId: '' }));
+        }
+    };
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        let { name, value } = e.target;
+        if (name === 'nationality') {
+            value = value.toUpperCase();
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -239,7 +260,14 @@ export default function Bookings() {
                 <form className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 text-sm" autoComplete="off">
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-700 font-medium">Booking Id</label>
-                        <input name="bookingId" value={formData.bookingId} readOnly className="px-2 py-1.5 border border-slate-300 bg-white rounded bg-slate-50" />
+                        <input
+                            name="bookingId"
+                            value={formData.bookingId}
+                            onChange={handleChange}
+                            onBlur={handleBookingIdBlur}
+                            disabled={isFormDisabled}
+                            className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-100"
+                        />
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-700 font-medium">Channel</label>

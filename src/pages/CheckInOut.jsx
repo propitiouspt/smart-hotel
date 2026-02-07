@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/db';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, CheckCircle, LogIn, LogOut, X } from 'lucide-react';
+import { useDevice } from '../hooks/useDevice';
+import { ArrowLeft, CheckCircle, LogIn, LogOut, X, Filter } from 'lucide-react';
 import { differenceInDays, format, isWithinInterval, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { MessageModal, ConfirmModal, PasswordModal } from '../components/Modal';
 import FilterDialog from '../components/FilterDialog';
-import { Filter } from 'lucide-react';
 
 export default function CheckInOut() {
     const { currentUser } = useAuth();
+    const { isMobile, isTablet } = useDevice();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [rooms, setRooms] = useState([]);
@@ -334,25 +335,25 @@ export default function CheckInOut() {
     return (
         <div className="space-y-4 max-w-[1400px] mx-auto">
             {/* Header / Top Actions - HIDDEN ON PRINT */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-lg border border-slate-200 gap-4 print:hidden">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Check- In / Out</h2>
+            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 ${isMobile ? 'p-2' : 'p-4'} rounded-lg border border-slate-200 gap-4 print:hidden`}>
+                <h2 className={`${isMobile ? 'text-lg' : 'text-xl sm:text-2xl'} font-bold text-slate-800`}>Check- In / Out</h2>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     <button
                         onClick={() => setShowFilters(true)}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-900 transition font-bold shadow-md"
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-800 text-white ${isMobile ? 'px-2 py-1.5 text-xs' : 'px-4 py-2'} rounded-lg border border-slate-700 hover:bg-slate-900 transition font-bold shadow-md`}
                     >
-                        <Filter size={18} className="text-cyan-400" /> Filter
+                        <Filter size={isMobile ? 14 : 18} className="text-cyan-400" /> Filter
                     </button>
                     <button
                         onClick={handleEditSelected}
                         disabled={!selectedBooking || viewMode !== 'VIEW'}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded border border-blue-300 hover:bg-blue-200 transition font-medium disabled:opacity-50"
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-100 text-blue-700 ${isMobile ? 'px-2 py-1.5 text-xs' : 'px-4 py-2'} rounded border border-blue-300 hover:bg-blue-200 transition font-medium disabled:opacity-50`}
                     >
                         Edit
                     </button>
                     <button
                         onClick={handleBack}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-200 text-red-800 px-4 py-2 rounded border border-red-300 hover:bg-red-300 transition font-medium"
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-200 text-red-800 ${isMobile ? 'px-2 py-1.5 text-xs' : 'px-4 py-2'} rounded border border-red-300 hover:bg-red-300 transition font-medium`}
                     >
                         Back
                     </button>
@@ -364,8 +365,8 @@ export default function CheckInOut() {
                 "bg-white border-2 border-slate-300 min-h-[300px] overflow-hidden transition-opacity print:hidden",
                 (viewMode === 'NEW' || viewMode === 'EDIT') && "opacity-50 pointer-events-none"
             )}>
-                <div className="overflow-auto h-[350px]">
-                    <table className="w-full text-left text-sm border-collapse min-w-[1600px]">
+                <div className="overflow-auto h-[350px] scrollbar-thin scrollbar-thumb-slate-300">
+                    <table className={`w-full text-left ${isMobile ? 'text-[10px]' : 'text-sm'} border-collapse min-w-[1200px] lg:min-w-[1600px]`}>
                         <thead className="bg-slate-100 sticky top-0 z-10 border-b border-slate-300">
                             <tr>
                                 <th className="px-4 py-2 border-r border-slate-300 font-semibold text-slate-700 w-8"></th>
@@ -447,28 +448,28 @@ export default function CheckInOut() {
             </div>
 
             {/* Form Area - HIDDEN ON PRINT */}
-            <div className="bg-slate-100 p-4 sm:p-6 rounded-lg border border-slate-300 shadow-sm print:hidden">
-                <form className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 text-sm" autoComplete="off">
+            <div className={`bg-slate-100 ${isMobile ? 'p-3' : 'p-6'} rounded-lg border border-slate-300 shadow-sm print:hidden`}>
+                <form className={`grid grid-cols-1 ${isTablet ? 'grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'} gap-3 text-sm`} autoComplete="off">
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold">Booking Id</label>
+                        <label className="text-slate-700 font-bold">Booking Id</label>
                         <input name="bookingId" value={formData.bookingId} readOnly className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded font-bold" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold">Channel</label>
+                        <label className="text-slate-700 font-bold">Channel</label>
                         <select name="channel" value={formData.channel} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80">
                             <option>Direct</option><option>Booking.com</option><option>Airbnb</option><option>Expedia</option>
                         </select>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold">Booking Date</label>
+                        <label className="text-slate-700 font-bold">Booking Date</label>
                         <input type="date" name="bookingDate" value={formData.bookingDate} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold">Nationality</label>
+                        <label className="text-slate-700 font-bold">Nationality</label>
                         <input name="nationality" value={formData.nationality} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-yellow-100 rounded disabled:opacity-80" />
                     </div>
 
-                    <div className="flex flex-col gap-1 sm:col-span-2">
+                    <div className={`flex flex-col gap-1 ${isMobile ? '' : 'sm:col-span-2'}`}>
                         <label className="text-slate-700 font-medium">Main Guest</label>
                         <input name="mainGuestName" value={formData.mainGuestName} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
@@ -494,7 +495,7 @@ export default function CheckInOut() {
                         <input name="childrenAges" value={formData.childrenAges} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold text-blue-600">Assign Room</label>
+                        <label className="text-slate-700 font-bold text-blue-600">Assign Room</label>
                         <div className="flex gap-2">
                             <select name="roomType" value={formData.roomType} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-1 py-1.5 border border-slate-300 bg-white rounded font-bold disabled:bg-slate-50">
                                 <option value="T0">T0</option><option value="T1">T1</option><option value="T1F">T1F</option><option value="T2">T2</option>
@@ -526,7 +527,7 @@ export default function CheckInOut() {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-slate-700 font-medium font-bold text-red-600">Tax %</label>
+                        <label className="text-slate-700 font-bold text-red-600">Tax %</label>
                         <input name="taxPercent" placeholder="%" value={formData.taxPercent} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -571,16 +572,16 @@ export default function CheckInOut() {
                         <label className="text-slate-700 font-medium">Arrival time</label>
                         <input type="time" name="arrivalTime" value={formData.arrivalTime} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
-                    <div className="flex flex-col gap-1 sm:col-span-2">
+                    <div className={`flex flex-col gap-1 ${isMobile ? '' : 'sm:col-span-2'}`}>
                         <label className="text-slate-700 font-medium">Remarks</label>
                         <input name="remarks" value={formData.remarks} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
 
-                    <div className="flex flex-col gap-1 sm:col-span-2">
+                    <div className={`flex flex-col gap-1 ${isMobile ? '' : 'sm:col-span-2'}`}>
                         <label className="text-slate-700 font-medium">Contact No.</label>
                         <input name="contactPhone" placeholder="Phone Number" value={formData.contactPhone} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
-                    <div className="flex flex-col gap-1 sm:col-span-2">
+                    <div className={`flex flex-col gap-1 ${isMobile ? '' : 'sm:col-span-2'}`}>
                         <label className="text-slate-700 font-medium">Email Address</label>
                         <input name="contactEmail" placeholder="Email Address" value={formData.contactEmail} onChange={handleChange} disabled={viewMode === 'VIEW'} className="px-2 py-1.5 border border-slate-300 bg-white rounded disabled:bg-slate-50" />
                     </div>
@@ -596,7 +597,7 @@ export default function CheckInOut() {
                 </div>
 
                 {/* ID Proof Section - Always Editable for documentation */}
-                <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                <div className={`mt-4 ${isMobile ? 'p-3' : 'p-4'} bg-yellow-50 border-2 border-yellow-200 rounded-lg`}>
                     <label className="block text-sm font-bold text-yellow-800 mb-2 uppercase tracking-tight flex flex-col sm:flex-row justify-between gap-1">
                         <span>ID Proof Memo & Images (Paste Directly)</span>
                         <span className="text-[10px] text-yellow-600 font-normal">Pasted images are auto-compressed</span>
@@ -637,14 +638,14 @@ export default function CheckInOut() {
                 </div>
 
                 {/* Check-Out Section */}
-                <div className="mt-4 pt-4 border-t border-slate-300 grid grid-cols-1 sm:grid-cols-12 gap-4">
-                    <div className="sm:col-span-2 flex flex-col justify-end gap-2">
+                <div className={`mt-4 pt-4 border-t border-slate-300 grid grid-cols-1 ${isTablet ? 'sm:grid-cols-2' : 'sm:grid-cols-12'} gap-4`}>
+                    <div className={`${isTablet ? '' : 'sm:col-span-2'} flex flex-col justify-end gap-2`}>
                         <label className="text-slate-700 font-medium">Check-out Action</label>
                         <button onClick={handleMarkCheckOut} disabled={!selectedBooking || !formData.checkedIn} className="w-full bg-green-600 text-white py-4 rounded hover:bg-green-700 font-bold transition shadow-md disabled:opacity-50">
                             Check-Out
                         </button>
                     </div>
-                    <div className="sm:col-span-8">
+                    <div className={`${isTablet ? 'sm:col-span-2' : 'sm:col-span-8'}`}>
                         <label className="text-slate-700 font-medium mb-1 block">Check-out Note</label>
                         <textarea
                             name="checkoutNote"
@@ -654,7 +655,7 @@ export default function CheckInOut() {
                             className="w-full h-24 p-2 border border-slate-300 bg-white rounded resize-none disabled:bg-slate-50"
                         ></textarea>
                     </div>
-                    <div className="sm:col-span-2 flex flex-col justify-end gap-2">
+                    <div className={`${isTablet ? 'sm:col-span-2' : 'sm:col-span-2'} flex flex-col justify-end gap-2`}>
                         <label className="text-slate-700 font-medium">Reporting</label>
                         <button onClick={() => { setPrintMode('OUT_REGISTER'); setTimeout(() => window.print(), 100); }} disabled={viewMode !== 'VIEW'} className="w-full bg-slate-700 text-white py-4 rounded hover:bg-slate-800 font-bold transition leading-tight shadow-md disabled:opacity-50">
                             Print Reg

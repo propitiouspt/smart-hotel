@@ -138,7 +138,7 @@ export default function Dashboard() {
                             <p className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-1">{card.label}</p>
                             <p className="text-2xl font-bold text-slate-800">{card.value}</p>
                         </div>
-                        <div className={`w-11 h-11 rounded-1.5xl ${card.color} flex items-center justify-center text-white shadow-lg opacity-90`}>
+                        <div className={`w-11 h-11 rounded-2xl ${card.color} flex items-center justify-center text-white shadow-lg opacity-90`}>
                             <card.icon className="w-5 h-5" />
                         </div>
                     </div>

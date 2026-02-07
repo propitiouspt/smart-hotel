@@ -22,6 +22,9 @@ import Reports from './pages/Reports';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Backup from './pages/Backup';
+import Inventory from './pages/Inventory';
+import Laundry from './pages/Laundry';
+import PettyCash from './pages/PettyCash';
 
 function ProtectedRoute({ children, allowedRoles }) {
     const { currentUser } = useAuth();
@@ -29,6 +32,7 @@ function ProtectedRoute({ children, allowedRoles }) {
     if (!currentUser) return <Navigate to="/login" replace />;
     if (allowedRoles && !allowedRoles.includes(currentUser.userType)) {
         // Redirect to a page they can see, e.g., Housekeeping for staff
+        if (currentUser.userType === 'Investors') return <Navigate to="/" replace />;
         return currentUser.userType === 'Staff'
             ? <Navigate to="/housekeeping" replace />
             : <Navigate to="/" replace />;
@@ -44,7 +48,7 @@ function AppRoutes() {
 
             <Route element={<DashboardLayout />}>
                 <Route path="/" element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                    <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Investors']}>
                         <Dashboard />
                     </ProtectedRoute>
                 } />
@@ -74,7 +78,7 @@ function AppRoutes() {
                 } />
 
                 <Route path="/reports" element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                    <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Investors']}>
                         <Reports />
                     </ProtectedRoute>
                 } />
@@ -88,6 +92,24 @@ function AppRoutes() {
                 <Route path="/backup" element={
                     <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
                         <Backup />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/inventory" element={
+                    <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                        <Inventory />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/laundry" element={
+                    <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                        <Laundry />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/petty-cash" element={
+                    <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                        <PettyCash />
                     </ProtectedRoute>
                 } />
             </Route>

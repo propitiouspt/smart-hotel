@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Building2 } from 'lucide-react';
+import { db } from '../services/db';
 
 export default function Login() {
     const [userId, setUserId] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
+    const hotelSettings = db.settings.get('H001');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -27,7 +29,7 @@ export default function Login() {
                     <div className="p-3 bg-blue-600 rounded-full mb-4">
                         <Building2 className="w-8 h-8 text-white" />
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-800">Smart Hotel</h1>
+                    <h1 className="text-2xl font-bold text-slate-800">{hotelSettings?.entityName || 'Smart Hotel'}</h1>
                     <p className="text-slate-500">Property Management System</p>
                 </div>
 
