@@ -21,15 +21,40 @@ export default function Reports() {
         channel: 'All'
     });
     const [hotelSettings, setHotelSettings] = useState(null);
+    const [inventoryMaster, setInventoryMaster] = useState([]);
+    const [inventoryTransactions, setInventoryTransactions] = useState([]);
+    const [laundryMaster, setLaundryMaster] = useState([]);
+    const [laundryTransactions, setLaundryTransactions] = useState([]);
 
     useEffect(() => {
-        setRooms(db.rooms.find(r => r.hotelId === currentUser.hotelId));
-        setHotelSettings(db.settings.get(currentUser.hotelId));
-        loadBookings();
+        const init = async () => {
+            if (!currentUser) return;
+            const rData = await db.rooms.find(r => r.hotelId === currentUser.hotelId);
+            setRooms(rData);
+            const settings = await db.settings.get(currentUser.hotelId);
+            setHotelSettings(settings);
+
+            if (!isInvestor) {
+                const [invM, invT, lndM, lndT] = await Promise.all([
+                    db.inventory.master.getAll(),
+                    db.inventory.transactions.getAll(),
+                    db.laundry.master.getAll(),
+                    db.laundry.transactions.getAll()
+                ]);
+                setInventoryMaster(invM);
+                setInventoryTransactions(invT);
+                setLaundryMaster(lndM);
+                setLaundryTransactions(lndT);
+            }
+
+            await loadBookings();
+        };
+        init();
     }, [currentUser, appliedFilters]);
 
-    const loadBookings = () => {
-        let bData = db.bookings.find(b => b.hotelId === currentUser.hotelId);
+    const loadBookings = async () => {
+        if (!currentUser) return;
+        let bData = await db.bookings.find(b => b.hotelId === currentUser.hotelId);
 
         // Apply Filters
         if (appliedFilters.startDate && appliedFilters.endDate) {
@@ -260,7 +285,7 @@ export default function Reports() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {db.inventory.master.getAll().map(item => (
+                                        {inventoryMaster.map(item => (
                                             <tr key={item.itemCode} className="hover:bg-slate-50">
                                                 <td className="px-4 py-2 border border-slate-300 font-mono">{item.itemCode}</td>
                                                 <td className="px-4 py-2 border border-slate-300 font-medium">{item.itemName}</td>
@@ -293,7 +318,7 @@ export default function Reports() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {db.inventory.transactions.getAll().slice(-20).reverse().map(trn => (
+                                        {inventoryTransactions.slice(-20).reverse().map(trn => (
                                             <tr key={trn.id}>
                                                 <td className="px-4 py-2 border border-slate-300">{trn.itemDate}</td>
                                                 <td className="px-4 py-2 border border-slate-300 font-medium">{trn.itemName}</td>
@@ -333,7 +358,7 @@ export default function Reports() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {db.laundry.master.getAll().map(item => (
+                                        {laundryMaster.map(item => (
                                             <tr key={item.itemCode} className="hover:bg-slate-50">
                                                 <td className="px-4 py-2 border border-slate-300 font-mono">{item.itemCode}</td>
                                                 <td className="px-4 py-2 border border-slate-300 font-medium">{item.itemName}</td>
@@ -364,7 +389,7 @@ export default function Reports() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {db.laundry.transactions.getAll().slice(-20).reverse().map(trn => (
+                                        {laundryTransactions.slice(-20).reverse().map(trn => (
                                             <tr key={trn.id}>
                                                 <td className="px-4 py-2 border border-slate-300">{trn.itemDate}</td>
                                                 <td className="px-4 py-2 border border-slate-300 font-medium">{trn.itemName}</td>

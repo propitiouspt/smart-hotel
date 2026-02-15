@@ -28,20 +28,32 @@ export default function Inventory() {
     const [showMasterDialog, setShowMasterDialog] = useState(false);
     const [editTrn, setEditTrn] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const hotelSettings = db.settings.get(currentUser?.hotelId || 'H001');
+    const [hotelSettings, setHotelSettings] = useState(null);
 
     useEffect(() => {
-        loadTransactions();
-    }, []);
+        const init = async () => {
+            if (!currentUser) return;
+            const settings = await db.settings.get(currentUser.hotelId || 'H001');
+            setHotelSettings(settings);
+            await loadTransactions();
+        };
+        init();
+    }, [currentUser]);
 
-    const loadTransactions = () => {
-        setTransactions(db.inventory.transactions.getAll());
+    const loadTransactions = async () => {
+        if (!currentUser) return;
+        const data = await db.inventory.transactions.getAll();
+        setTransactions(data);
     };
 
-    const handleDelete = (id) => {
-        db.inventory.transactions.delete(id);
-        loadTransactions();
-        setConfirmDeleteId(null);
+    const handleDelete = async (id) => {
+        try {
+            await db.inventory.transactions.delete(id);
+            await loadTransactions();
+            setConfirmDeleteId(null);
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+        }
     };
 
     const handlePrint = () => {

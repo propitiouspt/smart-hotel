@@ -28,20 +28,37 @@ export default function Laundry() {
     const [showMasterDialog, setShowMasterDialog] = useState(false);
     const [editTrn, setEditTrn] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const hotelSettings = db.settings.get(currentUser?.hotelId || 'H001');
+    const [hotelSettings, setHotelSettings] = useState(null);
+    const [masterItems, setMasterItems] = useState([]);
 
     useEffect(() => {
-        loadTransactions();
-    }, []);
+        const init = async () => {
+            if (!currentUser) return;
+            const settings = await db.settings.get(currentUser.hotelId || 'H001');
+            setHotelSettings(settings);
+            const mData = await db.laundry.master.getAll();
+            setMasterItems(mData);
+            await loadTransactions();
+        };
+        init();
+    }, [currentUser]);
 
-    const loadTransactions = () => {
-        setTransactions(db.laundry.transactions.getAll());
+    const loadTransactions = async () => {
+        if (!currentUser) return;
+        const data = await db.laundry.transactions.getAll();
+        setTransactions(data);
+        const mData = await db.laundry.master.getAll();
+        setMasterItems(mData);
     };
 
-    const handleDelete = (id) => {
-        db.laundry.transactions.delete(id);
-        loadTransactions();
-        setConfirmDeleteId(null);
+    const handleDelete = async (id) => {
+        try {
+            await db.laundry.transactions.delete(id);
+            await loadTransactions();
+            setConfirmDeleteId(null);
+        } catch (error) {
+            console.error('Error deleting laundry record:', error);
+        }
     };
 
     const handlePrint = () => {
@@ -105,7 +122,7 @@ export default function Laundry() {
                     <h3 className="font-bold">Linen Status Overview (Clean / Inhouse / Outside)</h3>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                    {db.laundry.master.getAll().map(item => (
+                    {masterItems.map(item => (
                         <div key={item.itemCode} className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.itemCode}</span>
                             <div className="flex items-baseline gap-1">
@@ -117,7 +134,7 @@ export default function Laundry() {
                             </div>
                         </div>
                     ))}
-                    {db.laundry.master.getAll().length === 0 && (
+                    {masterItems.length === 0 && (
                         <p className="text-sm text-slate-400 italic">No master items defined.</p>
                     )}
                 </div>

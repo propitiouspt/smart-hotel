@@ -71,8 +71,9 @@ export default function Bookings() {
     const [formData, setFormData] = useState(initialForm);
 
     // Load Data
-    const loadData = () => {
-        let bData = db.bookings.find(b => b.hotelId === currentUser.hotelId);
+    const loadData = async () => {
+        if (!currentUser) return;
+        let bData = await db.bookings.find(b => b.hotelId === currentUser.hotelId);
 
         // Apply Filters
         if (appliedFilters.startDate && appliedFilters.endDate) {
@@ -89,9 +90,10 @@ export default function Bookings() {
         }
 
         setBookings(bData.sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate)));
-        const rData = db.rooms.find(r => r.hotelId === currentUser.hotelId);
+        const rData = await db.rooms.find(r => r.hotelId === currentUser.hotelId);
         setRooms(rData);
-        setHotelSettings(db.settings.get(currentUser.hotelId));
+        const settings = await db.settings.get(currentUser.hotelId);
+        setHotelSettings(settings);
     };
 
     useEffect(() => {
@@ -152,12 +154,16 @@ export default function Bookings() {
         setViewMode('EDIT');
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        db.bookings.save({ ...formData, hotelId: currentUser.hotelId });
-        loadData();
-        setMessageModal({ show: true, message: 'Booking Saved Successfully!', title: 'System Message' });
-        setViewMode('VIEW');
+        try {
+            await db.bookings.save({ ...formData, hotelId: currentUser.hotelId });
+            await loadData();
+            setMessageModal({ show: true, message: 'Booking Saved Successfully!', title: 'System Message' });
+            setViewMode('VIEW');
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error saving booking. Please try again.', title: 'Error' });
+        }
     };
 
     const handleDelete = () => {
@@ -185,12 +191,12 @@ export default function Bookings() {
         }
     };
 
-    const handleBookingIdBlur = (e) => {
+    const handleBookingIdBlur = async (e) => {
         const newId = e.target.value;
         if (!newId) return;
 
         // Check for duplicates
-        const allBookings = db.bookings.find(b => b.hotelId === currentUser.hotelId);
+        const allBookings = await db.bookings.find(b => b.hotelId === currentUser.hotelId);
         const duplicate = allBookings.find(b => b.bookingId === newId && b.id !== formData.id);
 
         if (duplicate) {

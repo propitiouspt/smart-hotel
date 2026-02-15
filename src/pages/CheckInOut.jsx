@@ -77,8 +77,9 @@ export default function CheckInOut() {
     const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
     const [passwordModal, setPasswordModal] = useState({ show: false, title: '', onConfirm: null });
 
-    const loadData = () => {
-        let bData = db.bookings.find(b => b.hotelId === currentUser.hotelId);
+    const loadData = async () => {
+        if (!currentUser) return;
+        let bData = await db.bookings.find(b => b.hotelId === currentUser.hotelId);
 
         // Apply Filters
         if (appliedFilters.startDate && appliedFilters.endDate) {
@@ -96,9 +97,10 @@ export default function CheckInOut() {
 
         // Sort: active/today first
         setBookings(bData.sort((a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)));
-        const rData = db.rooms.find(r => r.hotelId === currentUser.hotelId);
+        const rData = await db.rooms.find(r => r.hotelId === currentUser.hotelId);
         setRooms(rData);
-        setHotelSettings(db.settings.get(currentUser.hotelId));
+        const settings = await db.settings.get(currentUser.hotelId);
+        setHotelSettings(settings);
     };
 
     useEffect(() => {
@@ -228,11 +230,15 @@ export default function CheckInOut() {
         }
     };
 
-    const handleSave = () => {
-        db.bookings.save({ ...formData, hotelId: currentUser.hotelId });
-        loadData();
-        setMessageModal({ show: true, message: viewMode === 'NEW' ? 'New Booking Created!' : 'Booking Updated!', title: 'System Message' });
-        setViewMode('VIEW');
+    const handleSave = async () => {
+        try {
+            await db.bookings.save({ ...formData, hotelId: currentUser.hotelId });
+            await loadData();
+            setMessageModal({ show: true, message: viewMode === 'NEW' ? 'New Booking Created!' : 'Booking Updated!', title: 'System Message' });
+            setViewMode('VIEW');
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error saving booking. Please try again.', title: 'Error' });
+        }
     };
 
     const handleMarkCheckIn = () => {
@@ -245,30 +251,34 @@ export default function CheckInOut() {
         setConfirmModal({
             show: true,
             message: `Confirm Check-In for ${formData.mainGuestName}?`,
-            onConfirm: () => {
-                // Update Booking
-                db.bookings.save({
-                    ...formData,
-                    hotelId: currentUser.hotelId,
-                    checkedIn: true,
-                    actualArrivalTime: new Date().toISOString(),
-                    checkInTime: format(new Date(), 'HH:mm'),
-                    checkedInBy: currentUser.userName
-                });
-
-                // Update Room
-                const room = rooms.find(r => r.roomNo === formData.assignedRoomNo);
-                if (room) {
-                    db.rooms.save({
-                        ...room,
-                        statusOfRoom: 'Occupied',
-                        currentGuest: formData.mainGuestName,
-                        currentRate: formData.totalBookingAmount / (formData.nights || 1)
+            onConfirm: async () => {
+                try {
+                    // Update Booking
+                    await db.bookings.save({
+                        ...formData,
+                        hotelId: currentUser.hotelId,
+                        checkedIn: true,
+                        actualArrivalTime: new Date().toISOString(),
+                        checkInTime: format(new Date(), 'HH:mm'),
+                        checkedInBy: currentUser.userName
                     });
-                }
 
-                loadData();
-                setMessageModal({ show: true, message: 'Guest Checked In Successfully', title: 'System Message' });
+                    // Update Room
+                    const room = rooms.find(r => r.roomNo === formData.assignedRoomNo);
+                    if (room) {
+                        await db.rooms.save({
+                            ...room,
+                            statusOfRoom: 'Occupied',
+                            currentGuest: formData.mainGuestName,
+                            currentRate: formData.totalBookingAmount / (formData.nights || 1)
+                        });
+                    }
+
+                    await loadData();
+                    setMessageModal({ show: true, message: 'Guest Checked In Successfully', title: 'System Message' });
+                } catch (error) {
+                    setMessageModal({ show: true, message: 'Error checking in guest. Please try again.', title: 'Error' });
+                }
             }
         });
     };
@@ -278,30 +288,34 @@ export default function CheckInOut() {
         setConfirmModal({
             show: true,
             message: `Confirm Check-Out for ${formData.mainGuestName}?`,
-            onConfirm: () => {
-                // Update Booking
-                db.bookings.save({
-                    ...formData,
-                    hotelId: currentUser.hotelId,
-                    checkedIn: false,
-                    actualCheckoutDate: new Date().toISOString(),
-                    checkOutTime: `${format(new Date(), 'HH:mm')} - ${currentUser.userName}`
-                });
-
-                // Update Room
-                const room = rooms.find(r => r.roomNo === formData.assignedRoomNo);
-                if (room) {
-                    db.rooms.save({
-                        ...room,
-                        statusOfRoom: 'Available',
-                        currentGuest: '',
-                        currentRate: 0,
-                        cleaningStatus: 'Dirty'
+            onConfirm: async () => {
+                try {
+                    // Update Booking
+                    await db.bookings.save({
+                        ...formData,
+                        hotelId: currentUser.hotelId,
+                        checkedIn: false,
+                        actualCheckoutDate: new Date().toISOString(),
+                        checkOutTime: `${format(new Date(), 'HH:mm')} - ${currentUser.userName}`
                     });
-                }
 
-                loadData();
-                setMessageModal({ show: true, message: 'Guest Checked Out Successfully', title: 'System Message' });
+                    // Update Room
+                    const room = rooms.find(r => r.roomNo === formData.assignedRoomNo);
+                    if (room) {
+                        await db.rooms.save({
+                            ...room,
+                            statusOfRoom: 'Available',
+                            currentGuest: '',
+                            currentRate: 0,
+                            cleaningStatus: 'Dirty'
+                        });
+                    }
+
+                    await loadData();
+                    setMessageModal({ show: true, message: 'Guest Checked Out Successfully', title: 'System Message' });
+                } catch (error) {
+                    setMessageModal({ show: true, message: 'Error checking out guest. Please try again.', title: 'Error' });
+                }
             }
         });
     };
@@ -316,15 +330,19 @@ export default function CheckInOut() {
         setPasswordModal({
             show: true,
             title: 'Delete Booking Confirmation',
-            onConfirm: (password) => {
+            onConfirm: async (password) => {
                 if (password === currentUser.password) {
-                    db.bookings.delete(selectedBooking.bookingId);
-                    loadData();
-                    setSelectedBooking(null);
-                    setFormData(initialForm);
-                    setViewMode('VIEW');
-                    setPasswordModal({ show: false });
-                    setMessageModal({ show: true, message: 'Booking Deleted Successfully!', title: 'System Message' });
+                    try {
+                        await db.bookings.delete(selectedBooking.bookingId);
+                        await loadData();
+                        setSelectedBooking(null);
+                        setFormData(initialForm);
+                        setViewMode('VIEW');
+                        setPasswordModal({ show: false });
+                        setMessageModal({ show: true, message: 'Booking Deleted Successfully!', title: 'System Message' });
+                    } catch (error) {
+                        setMessageModal({ show: true, message: 'Error deleting booking. Please try again.', title: 'Error' });
+                    }
                 } else {
                     setMessageModal({ show: true, message: 'Incorrect Password!', title: 'Security Error' });
                 }

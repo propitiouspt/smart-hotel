@@ -14,12 +14,19 @@ export default function Backup() {
         setStatus('loading');
 
         try {
-            // Fetch all data from DB
-            const users = db.users.getAll();
-            const rooms = db.rooms.getAll();
-            const bookings = db.bookings.getAll();
-            const tasks = db.tasks.getAll();
-            const settings = db.settings.get('H001'); // Assuming H001 for now
+            // Fetch all data from DB asynchronously
+            const [users, rooms, bookings, tasks, settings, invMaster, invTrn, lndMaster, lndTrn, pettyCashData] = await Promise.all([
+                db.users.getAll(),
+                db.rooms.getAll(),
+                db.bookings.getAll(),
+                db.tasks.getAll(),
+                db.settings.get('H001'),
+                db.inventory.master.getAll(),
+                db.inventory.transactions.getAll(),
+                db.laundry.master.getAll(),
+                db.laundry.transactions.getAll(),
+                db.pettyCash.getAll()
+            ]);
 
             // Create workbook
             const wb = XLSX.utils.book_new();
@@ -31,10 +38,11 @@ export default function Backup() {
                 { data: tasks, name: 'Tasks' },
                 { data: users.map(({ password, ...u }) => u), name: 'Users' },
                 { data: [settings], name: 'Settings' },
-                { data: db.inventory.master.getAll(), name: 'Inventory Master' },
-                { data: db.inventory.transactions.getAll(), name: 'Inventory Transactions' },
-                { data: db.laundry.master.getAll(), name: 'Laundry Master' },
-                { data: db.laundry.transactions.getAll(), name: 'Laundry Transactions' }
+                { data: invMaster, name: 'Inventory Master' },
+                { data: invTrn, name: 'Inventory Transactions' },
+                { data: lndMaster, name: 'Laundry Master' },
+                { data: lndTrn, name: 'Laundry Transactions' },
+                { data: pettyCashData, name: 'Petty Cash' }
             ];
 
             sheets.forEach(sheet => {
@@ -42,7 +50,6 @@ export default function Backup() {
                     const ws = XLSX.utils.json_to_sheet(Array.isArray(sheet.data) ? sheet.data : [sheet.data]);
                     XLSX.utils.book_append_sheet(wb, ws, sheet.name);
                 } else {
-                    // Even if empty, create a sheet with headers if possible or just an empty sheet
                     const ws = XLSX.utils.json_to_sheet([]);
                     XLSX.utils.book_append_sheet(wb, ws, sheet.name);
                 }
@@ -50,7 +57,7 @@ export default function Backup() {
 
             // Generate filename
             const date = new Date().toISOString().split('T')[0];
-            const entitySafe = (hotelSettings?.entityName || 'SmartHotel').replace(/[^a-z0-9]/gi, '_');
+            const entitySafe = (settings?.entityName || 'SmartHotel').replace(/[^a-z0-9]/gi, '_');
             const filename = `${entitySafe}_Backup_${date}.xlsx`;
 
             // Export file

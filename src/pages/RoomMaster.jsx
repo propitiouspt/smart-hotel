@@ -31,8 +31,9 @@ export default function RoomMaster() {
     const [formData, setFormData] = useState(initialForm);
 
     // Load Data
-    const loadRooms = () => {
-        const data = db.rooms.find(r => r.hotelId === currentUser.hotelId);
+    const loadRooms = async () => {
+        if (!currentUser) return;
+        const data = await db.rooms.find(r => r.hotelId === currentUser.hotelId);
         setRooms(data);
     };
 
@@ -72,25 +73,33 @@ export default function RoomMaster() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        db.rooms.save({ ...formData, hotelId: currentUser.hotelId });
-        loadRooms();
-        setViewMode('VIEW');
-        setMessageModal({ show: true, message: 'Room details saved successfully!', title: 'System Message' });
+        try {
+            await db.rooms.save({ ...formData, hotelId: currentUser.hotelId });
+            await loadRooms();
+            setViewMode('VIEW');
+            setMessageModal({ show: true, message: 'Room details saved successfully!', title: 'System Message' });
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error saving room details. Please try again.', title: 'Error' });
+        }
     };
 
     const handleDelete = () => {
         setConfirmModal({
             show: true,
             message: 'Are you sure you want to delete this room?',
-            onConfirm: () => {
-                db.rooms.delete(formData.roomNo, currentUser.hotelId);
-                loadRooms();
-                setSelectedRoom(null);
-                setFormData(initialForm);
-                setViewMode('VIEW');
-                setMessageModal({ show: true, message: 'Room deleted successfully.', title: 'System Message' });
+            onConfirm: async () => {
+                try {
+                    await db.rooms.delete(formData.roomNo, currentUser.hotelId);
+                    await loadRooms();
+                    setSelectedRoom(null);
+                    setFormData(initialForm);
+                    setViewMode('VIEW');
+                    setMessageModal({ show: true, message: 'Room deleted successfully.', title: 'System Message' });
+                } catch (error) {
+                    setMessageModal({ show: true, message: 'Error deleting room. Please try again.', title: 'Error' });
+                }
             }
         });
     };

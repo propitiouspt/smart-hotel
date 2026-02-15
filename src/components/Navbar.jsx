@@ -29,7 +29,17 @@ export default function Navbar() {
     const { isMobile, isTablet, width } = useDevice();
     const navigate = useNavigate();
     const role = currentUser?.userType;
-    const hotelSettings = db.settings.get(currentUser?.hotelId || 'H001');
+    const [hotelSettings, setHotelSettings] = useState(null);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            if (currentUser) {
+                const settings = await db.settings.get(currentUser.hotelId || 'H001');
+                setHotelSettings(settings);
+            }
+        };
+        fetchSettings();
+    }, [currentUser]);
 
     const links = [
         {

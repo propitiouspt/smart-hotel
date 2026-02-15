@@ -27,20 +27,32 @@ export default function PettyCash() {
     const [showTrnDialog, setShowTrnDialog] = useState(false);
     const [editTrn, setEditTrn] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const hotelSettings = db.settings.get(currentUser?.hotelId || 'H001');
+    const [hotelSettings, setHotelSettings] = useState(null);
 
     useEffect(() => {
-        loadTransactions();
-    }, []);
+        const init = async () => {
+            if (!currentUser) return;
+            const settings = await db.settings.get(currentUser.hotelId || 'H001');
+            setHotelSettings(settings);
+            await loadTransactions();
+        };
+        init();
+    }, [currentUser]);
 
-    const loadTransactions = () => {
-        setTransactions(db.pettyCash.getAll());
+    const loadTransactions = async () => {
+        if (!currentUser) return;
+        const data = await db.pettyCash.getAll();
+        setTransactions(data);
     };
 
-    const handleDelete = (vchNo) => {
-        db.pettyCash.delete(vchNo);
-        loadTransactions();
-        setConfirmDeleteId(null);
+    const handleDelete = async (vchNo) => {
+        try {
+            await db.pettyCash.delete(vchNo);
+            await loadTransactions();
+            setConfirmDeleteId(null);
+        } catch (error) {
+            console.error('Error deleting petty cash voucher:', error);
+        }
     };
 
     const handlePrintRegister = () => {

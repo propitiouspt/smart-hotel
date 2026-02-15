@@ -8,13 +8,21 @@ export default function Login() {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [hotelSettings, setHotelSettings] = useState(null);
     const { login } = useAuth();
     const navigate = useNavigate();
-    const hotelSettings = db.settings.get('H001');
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const settings = await db.settings.get('H001');
+            setHotelSettings(settings);
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const result = login(userId, password);
+        const result = await login(userId, password);
         if (result.success) {
             navigate('/');
         } else {

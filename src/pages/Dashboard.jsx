@@ -43,63 +43,68 @@ export default function Dashboard() {
     });
 
     useEffect(() => {
-        const today = format(new Date(), 'yyyy-MM-dd');
-        const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
-        const hotelId = currentUser.hotelId;
+        const fetchStats = async () => {
+            if (!currentUser) return;
+            const today = format(new Date(), 'yyyy-MM-dd');
+            const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+            const hotelId = currentUser.hotelId;
 
-        // Fetch Data
-        const bookings = db.bookings.find(b => b.hotelId === hotelId);
-        const rooms = db.rooms.find(r => r.hotelId === hotelId);
-        const tasks = db.tasks.find(t => t.hotelId === hotelId);
+            // Fetch Data
+            const bookings = await db.bookings.find(b => b.hotelId === hotelId);
+            const rooms = await db.rooms.find(r => r.hotelId === hotelId);
+            const tasks = await db.tasks.find(t => t.hotelId === hotelId);
 
-        // Basic Counts
-        const arrivals = bookings.filter(b => b.checkInDate === today && !b.checkedIn).length;
-        const departures = bookings.filter(b => b.checkOutDate === today && b.checkedIn).length;
-        const newBookingsToday = bookings.filter(b => b.bookingDate === today).length;
-        const availableRooms = rooms.filter(r => r.statusOfRoom === 'Available').length;
-        const inHouse = rooms.filter(r => r.statusOfRoom === 'Occupied').length;
-        const totalRooms = rooms.length || 1;
+            // Basic Counts
+            const arrivals = bookings.filter(b => b.checkInDate === today && !b.checkedIn).length;
+            const departures = bookings.filter(b => b.checkOutDate === today && b.checkedIn).length;
+            const newBookingsToday = bookings.filter(b => b.bookingDate === today).length;
+            const availableRooms = rooms.filter(r => r.statusOfRoom === 'Available').length;
+            const inHouse = rooms.filter(r => r.statusOfRoom === 'Occupied').length;
+            const totalRooms = rooms.length || 1;
 
-        // Revenue & Rates
-        const currentMonth = today.substring(0, 7);
-        const monthlyBookings = bookings.filter(b => b.checkInDate.startsWith(currentMonth));
-        const monthlyRevenue = monthlyBookings.reduce((sum, b) => sum + (Number(b.totalBookingAmount) || 0), 0);
+            // Revenue & Rates
+            const currentMonth = today.substring(0, 7);
+            const monthlyBookings = bookings.filter(b => b.checkInDate.startsWith(currentMonth));
+            const monthlyRevenue = monthlyBookings.reduce((sum, b) => sum + (Number(b.totalBookingAmount) || 0), 0);
 
-        const roomsSoldMonth = monthlyBookings.length || 1;
-        const adr = monthlyRevenue / roomsSoldMonth;
-        const revpar = monthlyRevenue / (totalRooms * 30); // Simple 30-day approximation
+            const roomsSoldMonth = monthlyBookings.length || 1;
+            const adr = monthlyRevenue / roomsSoldMonth;
+            const revpar = monthlyRevenue / (totalRooms * 30); // Simple 30-day approximation
 
-        // Housekeeping & Maintenance
-        const dirtyRooms = rooms.filter(r => r.cleaningStatus === 'Dirty').length;
-        const outOfService = rooms.filter(r => r.statusOfRoom === 'Maintenance' || r.statusOfRoom === 'Out Of Order').length;
-        const inspectionsNeeded = rooms.filter(r => r.cleaningStatus === 'Inspected' || r.cleaningStatus === 'Ready').length; // Mock logic
-        const maintenanceOpen = tasks.filter(t => t.type === 'Maintenance' && t.status !== 'Completed').length;
+            // Housekeeping & Maintenance
+            const dirtyRooms = rooms.filter(r => r.cleaningStatus === 'Dirty').length;
+            const outOfService = rooms.filter(r => r.statusOfRoom === 'Maintenance' || r.statusOfRoom === 'Out Of Order').length;
+            const inspectionsNeeded = rooms.filter(r => r.cleaningStatus === 'Inspected' || r.cleaningStatus === 'Ready').length; // Mock logic
+            const maintenanceOpen = tasks.filter(t => t.type === 'Maintenance' && t.status !== 'Completed').length;
 
-        // Future & Special
-        const expectedTomorrow = bookings.filter(b => b.checkInDate === tomorrow).length;
-        const vipArrivals = bookings.filter(b => b.checkInDate === today && b.isVip).length;
-        const cancelledToday = bookings.filter(b => b.status === 'Cancelled' && b.modifiedDate === today).length;
+            // Future & Special
+            const expectedTomorrow = bookings.filter(b => b.checkInDate === tomorrow).length;
+            const vipArrivals = bookings.filter(b => b.checkInDate === today && b.isVip).length;
+            const cancelledToday = bookings.filter(b => b.status === 'Cancelled' && b.modifiedDate === today).length;
 
-        const occupancyRate = (inHouse / totalRooms) * 100;
+            const occupancyRate = (inHouse / totalRooms) * 100;
 
-        setStats({
-            arrivals,
-            departures,
-            inHouse,
-            availableRooms,
-            newBookings: newBookingsToday,
-            monthlyRevenue,
-            occupancyRate,
-            dirtyRooms,
-            outOfService,
-            maintenanceOpen,
-            expectedTomorrow,
-            vipArrivals,
-            cancelledToday,
-            adr,
-            revpar,
-            inspectionsNeeded
-        });
+            setStats({
+                arrivals,
+                departures,
+                inHouse,
+                availableRooms,
+                newBookings: newBookingsToday,
+                monthlyRevenue,
+                occupancyRate,
+                dirtyRooms,
+                outOfService,
+                maintenanceOpen,
+                expectedTomorrow,
+                vipArrivals,
+                cancelledToday,
+                adr,
+                revpar,
+                inspectionsNeeded
+            });
+        };
+
+        fetchStats();
     }, [currentUser]);
 
     const cards = [

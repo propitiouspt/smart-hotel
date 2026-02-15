@@ -41,7 +41,7 @@ export default function PettyCashTransactionDialog({ show, onClose, onSave, edit
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.name || !formData.amount || Number(formData.amount) <= 0) {
@@ -49,15 +49,19 @@ export default function PettyCashTransactionDialog({ show, onClose, onSave, edit
             return;
         }
 
-        const transaction = {
-            ...formData,
-            amount: Number(formData.amount),
-            user: currentUser?.userId || 'system'
-        };
+        try {
+            const transaction = {
+                ...formData,
+                amount: Number(formData.amount),
+                user: currentUser?.userId || 'system'
+            };
 
-        db.pettyCash.save(transaction);
-        onSave();
-        onClose();
+            await db.pettyCash.save(transaction);
+            await onSave();
+            onClose();
+        } catch (error) {
+            setMessage('Error saving voucher. Please try again.');
+        }
     };
 
     if (!show) return null;

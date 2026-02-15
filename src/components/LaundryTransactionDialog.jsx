@@ -20,8 +20,11 @@ export default function LaundryTransactionDialog({ show, onClose, onSave, editDa
 
     useEffect(() => {
         if (show) {
-            const masterItems = db.laundry.master.getAll();
-            setItems(masterItems);
+            const fetchItems = async () => {
+                const masterItems = await db.laundry.master.getAll();
+                setItems(masterItems);
+            };
+            fetchItems();
 
             if (editData) {
                 setFormData(editData);
@@ -48,7 +51,7 @@ export default function LaundryTransactionDialog({ show, onClose, onSave, editDa
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.itemCode || !formData.itemDate) {
@@ -61,16 +64,20 @@ export default function LaundryTransactionDialog({ show, onClose, onSave, editDa
             return;
         }
 
-        const transaction = {
-            ...formData,
-            itemQin: Number(formData.itemQin) || 0,
-            itemQout: Number(formData.itemQout) || 0,
-            itemUser: currentUser?.userId || 'system'
-        };
+        try {
+            const transaction = {
+                ...formData,
+                itemQin: Number(formData.itemQin) || 0,
+                itemQout: Number(formData.itemQout) || 0,
+                itemUser: currentUser?.userId || 'system'
+            };
 
-        db.laundry.transactions.save(transaction);
-        onSave();
-        onClose();
+            await db.laundry.transactions.save(transaction);
+            await onSave();
+            onClose();
+        } catch (error) {
+            setMessage('Error saving transaction. Please try again.');
+        }
     };
 
     if (!show) return null;

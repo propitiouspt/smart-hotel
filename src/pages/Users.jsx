@@ -32,10 +32,12 @@ export default function Users() {
         vatNo: ''
     });
 
-    const loadData = () => {
-        const uData = db.users.getAll();
+    const loadData = async () => {
+        if (!currentUser) return;
+        const uData = await db.users.getAll();
         setUsers(uData);
-        setHotelSettings(db.settings.get(currentUser.hotelId));
+        const settings = await db.settings.get(currentUser.hotelId);
+        setHotelSettings(settings);
     };
 
     useEffect(() => {
@@ -62,28 +64,36 @@ export default function Users() {
         }));
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
         if (!formData.userId) {
             setMessageModal({ show: true, message: 'User ID is required', title: 'System Message' });
             return;
         }
 
-        db.users.save({ ...formData, hotelId: currentUser.hotelId });
-        loadData();
-        setMessageModal({ show: true, message: 'User Saved Successfully!', title: 'System Message' });
-        handleNew(); // Reset
+        try {
+            await db.users.save({ ...formData, hotelId: currentUser.hotelId });
+            await loadData();
+            setMessageModal({ show: true, message: 'User Saved Successfully!', title: 'System Message' });
+            handleNew(); // Reset
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error saving user. Please try again.', title: 'Error' });
+        }
     };
 
     const handleDelete = (userId) => {
         setConfirmModal({
             show: true,
             message: 'Are you sure you want to delete this user?',
-            onConfirm: () => {
-                db.users.delete(userId);
-                loadData();
-                if (selectedUser?.userId === userId) handleNew();
-                setMessageModal({ show: true, message: 'User Deleted Successfully!', title: 'System Message' });
+            onConfirm: async () => {
+                try {
+                    await db.users.delete(userId);
+                    await loadData();
+                    if (selectedUser?.userId === userId) handleNew();
+                    setMessageModal({ show: true, message: 'User Deleted Successfully!', title: 'System Message' });
+                } catch (error) {
+                    setMessageModal({ show: true, message: 'Error deleting user. Please try again.', title: 'Error' });
+                }
             }
         });
     };
@@ -96,9 +106,9 @@ export default function Users() {
         setShowPasswordModal(true);
     };
 
-    const handlePasswordConfirm = (password) => {
+    const handlePasswordConfirm = async (password) => {
         // Fetch real user from DB to get the password (context removes it for security)
-        const realUser = db.users.findOne(u => u.userId === currentUser.userId);
+        const realUser = await db.users.findOne(u => u.userId === currentUser.userId);
         if (realUser && password === realUser.password) {
             setShowPasswordModal(false);
             setShowSettingsModal(true);
@@ -107,11 +117,15 @@ export default function Users() {
         }
     };
 
-    const handleSaveSettings = (e) => {
+    const handleSaveSettings = async (e) => {
         e.preventDefault();
-        db.settings.save({ ...hotelSettings, hotelId: currentUser.hotelId });
-        setShowSettingsModal(false);
-        setMessageModal({ show: true, message: 'Hotel Settings Updated Successfully!', title: 'System Message' });
+        try {
+            await db.settings.save({ ...hotelSettings, hotelId: currentUser.hotelId });
+            setShowSettingsModal(false);
+            setMessageModal({ show: true, message: 'Hotel Settings Updated Successfully!', title: 'System Message' });
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error saving settings. Please try again.', title: 'Error' });
+        }
     };
 
     return (

@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Check local storage for existing session
@@ -12,10 +13,11 @@ export const AuthProvider = ({ children }) => {
         if (storedUser) {
             setCurrentUser(JSON.parse(storedUser));
         }
+        setLoading(false);
     }, []);
 
-    const login = (userId, password) => {
-        const user = db.users.findOne(u => u.userId === userId && u.password === password && u.active);
+    const login = async (userId, password) => {
+        const user = await db.users.findOne(u => u.userId === userId && u.password === password && u.active);
         if (user) {
             // Don't store password in session
             const { password, ...safeUser } = user;
@@ -32,8 +34,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ currentUser, login, logout }}>
-            {children}
+        <AuthContext.Provider value={{ currentUser, login, logout, loading }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 };

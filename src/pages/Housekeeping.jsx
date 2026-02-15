@@ -25,14 +25,15 @@ export default function Housekeeping() {
     const isStaff = currentUser.userType === 'Staff';
 
     // Load Data
-    const loadData = () => {
-        const tData = db.tasks.find(t => t.hotelId === currentUser.hotelId);
+    const loadData = async () => {
+        if (!currentUser) return;
+        const tData = await db.tasks.find(t => t.hotelId === currentUser.hotelId);
         setTasks(tData);
 
         if (!isStaff) {
-            const rData = db.rooms.find(r => r.hotelId === currentUser.hotelId);
+            const rData = await db.rooms.find(r => r.hotelId === currentUser.hotelId);
             setRooms(rData);
-            const uData = db.users.find(u => u.hotelId === currentUser.hotelId && u.userType === 'Staff');
+            const uData = await db.users.find(u => u.hotelId === currentUser.hotelId && u.userType === 'Staff');
             setStaff(uData);
         }
     };
@@ -49,60 +50,71 @@ export default function Housekeeping() {
     };
     const [assignForm, setAssignForm] = useState(initialForm);
 
-    const handleAssign = (e) => {
+    const handleAssign = async (e) => {
         e.preventDefault();
-        const room = rooms.find(r => r.roomNo === assignForm.roomNo);
-        const user = staff.find(u => u.userId === assignForm.userId);
+        try {
+            const room = rooms.find(r => r.roomNo === assignForm.roomNo);
+            const user = staff.find(u => u.userId === assignForm.userId);
 
-        const newTask = {
-            taskId: `TSK-${Date.now()}`,
-            assignDate: format(new Date(), 'yyyy-MM-dd'),
-            assignTime: format(new Date(), 'HH:mm'),
-            userId: user.userId,
-            userName: user.userName,
-            roomNo: room.roomNo,
-            startStat: room.cleaningStatus,
-            endStat: '', // Pending
-            assignMemo: assignForm.assignMemo,
-            hotelId: currentUser.hotelId
-        };
+            if (!room || !user) return;
 
-        db.tasks.save(newTask);
-        loadData();
-        setAssignForm(initialForm);
+            const newTask = {
+                taskId: `TSK-${Date.now()}`,
+                assignDate: format(new Date(), 'yyyy-MM-dd'),
+                assignTime: format(new Date(), 'HH:mm'),
+                userId: user.userId,
+                userName: user.userName,
+                roomNo: room.roomNo,
+                startStat: room.cleaningStatus,
+                endStat: '', // Pending
+                assignMemo: assignForm.assignMemo,
+                hotelId: currentUser.hotelId
+            };
+
+            await db.tasks.save(newTask);
+            await loadData();
+            setAssignForm(initialForm);
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error assigning task. Please try again.', title: 'Error' });
+        }
     };
 
     // Staff: Complete Task Logic
-    const handleComplete = (e) => {
+    const handleComplete = async (e) => {
         e.preventDefault();
         if (!taskFeedback.cleanedFlag) {
             setMessageModal({ show: true, message: 'Please confirm the room is cleaned by checking the flag.', title: 'System Message' });
             return;
         }
 
-        // 1. Update Task
-        db.tasks.save({
-            ...selectedTask,
-            endStat: 'Ready',
-            endTime: taskFeedback.cleanedTime,
-            staffComment: taskFeedback.staffComment
-        });
-
-        // 2. Update Room Status
-        const room = db.rooms.find(r => r.roomNo === selectedTask.roomNo && r.hotelId === currentUser.hotelId)[0];
-        if (room) {
-            db.rooms.save({
-                ...room,
-                cleaningStatus: 'Ready',
-                lastCleanedBy: currentUser.userName,
-                lastCleanedTime: taskFeedback.cleanedTime
+        try {
+            // 1. Update Task
+            await db.tasks.save({
+                ...selectedTask,
+                endStat: 'Ready',
+                endTime: taskFeedback.cleanedTime,
+                staffComment: taskFeedback.staffComment
             });
-        }
 
-        loadData();
-        setSelectedTask(null);
-        setTaskFeedback({ staffComment: '', cleanedFlag: false, cleanedTime: format(new Date(), 'HH:mm') });
-        setMessageModal({ show: true, message: 'Room status updated to Ready!', title: 'System Message' });
+            // 2. Update Room Status
+            const roomsData = await db.rooms.find(r => r.roomNo === selectedTask.roomNo && r.hotelId === currentUser.hotelId);
+            const room = roomsData[0];
+            if (room) {
+                await db.rooms.save({
+                    ...room,
+                    cleaningStatus: 'Ready',
+                    lastCleanedBy: currentUser.userName,
+                    lastCleanedTime: taskFeedback.cleanedTime
+                });
+            }
+
+            await loadData();
+            setSelectedTask(null);
+            setTaskFeedback({ staffComment: '', cleanedFlag: false, cleanedTime: format(new Date(), 'HH:mm') });
+            setMessageModal({ show: true, message: 'Room status updated to Ready!', title: 'System Message' });
+        } catch (error) {
+            setMessageModal({ show: true, message: 'Error completing task. Please try again.', title: 'Error' });
+        }
     };
 
     const handleSelectTask = (task) => {

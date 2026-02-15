@@ -20,8 +20,11 @@ export default function InventoryTransactionDialog({ show, onClose, onSave, edit
 
     useEffect(() => {
         if (show) {
-            const masterItems = db.inventory.master.getAll();
-            setItems(masterItems);
+            const fetchItems = async () => {
+                const masterItems = await db.inventory.master.getAll();
+                setItems(masterItems);
+            };
+            fetchItems();
 
             if (editData) {
                 setFormData(editData);
@@ -47,7 +50,7 @@ export default function InventoryTransactionDialog({ show, onClose, onSave, edit
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.itemCode || !formData.itemDate) {
@@ -60,16 +63,20 @@ export default function InventoryTransactionDialog({ show, onClose, onSave, edit
             return;
         }
 
-        const transaction = {
-            ...formData,
-            itemPurQty: Number(formData.itemPurQty) || 0,
-            itemUseQty: Number(formData.itemUseQty) || 0,
-            user: currentUser?.userId || 'system'
-        };
+        try {
+            const transaction = {
+                ...formData,
+                itemPurQty: Number(formData.itemPurQty) || 0,
+                itemUseQty: Number(formData.itemUseQty) || 0,
+                user: currentUser?.userId || 'system'
+            };
 
-        db.inventory.transactions.save(transaction);
-        onSave();
-        onClose();
+            await db.inventory.transactions.save(transaction);
+            await onSave();
+            onClose();
+        } catch (error) {
+            setMessage('Error saving transaction. Please try again.');
+        }
     };
 
     if (!show) return null;

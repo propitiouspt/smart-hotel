@@ -30,11 +30,12 @@ export default function InventoryMasterDialog({ show, onClose }) {
         }
     }, [show]);
 
-    const loadItems = () => {
-        setItems(db.inventory.master.getAll());
+    const loadItems = async () => {
+        const data = await db.inventory.master.getAll();
+        setItems(data);
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
 
         if (!formData.itemCode || !formData.itemName || !formData.category) {
@@ -42,22 +43,26 @@ export default function InventoryMasterDialog({ show, onClose }) {
             return;
         }
 
-        const existingItems = db.inventory.master.getAll();
-        const duplicate = existingItems.find(i => i.itemCode === formData.itemCode && i.itemCode !== editItem?.itemCode);
+        try {
+            const existingItems = await db.inventory.master.getAll();
+            const duplicate = existingItems.find(i => i.itemCode === formData.itemCode && i.itemCode !== editItem?.itemCode);
 
-        if (duplicate) {
-            setMessage('Item code already exists. Please choose another.');
-            return;
+            if (duplicate) {
+                setMessage('Item code already exists. Please choose another.');
+                return;
+            }
+
+            await db.inventory.master.save({
+                ...formData,
+                itemOpstock: Number(formData.itemOpstock) || 0,
+            });
+
+            setMessage('Item saved successfully.');
+            resetForm();
+            await loadItems();
+        } catch (error) {
+            setMessage('Error saving item. Please try again.');
         }
-
-        db.inventory.master.save({
-            ...formData,
-            itemOpstock: Number(formData.itemOpstock) || 0,
-        });
-
-        setMessage('Item saved successfully.');
-        resetForm();
-        loadItems();
     };
 
     const resetForm = () => {
@@ -72,10 +77,14 @@ export default function InventoryMasterDialog({ show, onClose }) {
         setFormData(item);
     };
 
-    const handleDelete = (itemCode) => {
-        db.inventory.master.delete(itemCode);
-        loadItems();
-        setConfirmDelete(null);
+    const handleDelete = async (itemCode) => {
+        try {
+            await db.inventory.master.delete(itemCode);
+            await loadItems();
+            setConfirmDelete(null);
+        } catch (error) {
+            setMessage('Error deleting item. Please try again.');
+        }
     };
 
     const handleAddCategory = () => {
