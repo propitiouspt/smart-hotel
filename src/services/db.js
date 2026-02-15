@@ -7,7 +7,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Supabase URL or Anon Key is missing. Check your .env file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Safely create Supabase client to prevent app crash
+export const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : {
+        from: () => ({
+            select: () => Promise.resolve({ data: [], error: { message: 'Supabase not initialized' } }),
+            upsert: () => Promise.resolve({ data: [], error: { message: 'Supabase not initialized' } }),
+            delete: () => Promise.resolve({ error: { message: 'Supabase not initialized' } }),
+        })
+    };
 
 export const db = {
     users: {
