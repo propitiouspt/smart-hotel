@@ -422,21 +422,18 @@ export const db = {
                     console.error('Error fetching laundry transactions:', error);
                     return [];
                 }
-                return data || [];
+                return data.map(mapLaundryTrnFromDB);
             },
             save: async (trn) => {
                 const id = trn.id || Date.now().toString();
-                const newTrn = { ...trn, id };
+                const dbTrn = mapLaundryTrnToDB({ ...trn, id });
 
-                newTrn.itemQout = sanitizeNumeric(newTrn.itemQout) ?? 0;
-                newTrn.itemQin = sanitizeNumeric(newTrn.itemQin) ?? 0;
-
-                const { data, error } = await supabase.from('laundry_trn').upsert(newTrn).select();
+                const { data, error } = await supabase.from('laundry_trn').upsert(dbTrn).select();
                 if (error) {
                     console.error('Error saving laundry transaction:', error);
                     throw error;
                 }
-                return data[0];
+                return mapLaundryTrnFromDB(data[0]);
             },
             delete: async (id) => {
                 const { error } = await supabase.from('laundry_trn').delete().eq('id', id);
@@ -487,4 +484,3 @@ export const db = {
         }
     }
 };
-
