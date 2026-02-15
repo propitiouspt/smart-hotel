@@ -20,9 +20,9 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 
 // Helper to sanitize numeric values
 const sanitizeNumeric = (val) => {
-    if (val === '' || val === null || val === undefined) return null;
+    if (val === '' || val === null || val === undefined) return 0;
     const num = Number(val);
-    return isNaN(num) ? null : num;
+    return isNaN(num) ? 0 : num;
 };
 
 // Helper to sanitize Time/Date values
@@ -30,6 +30,103 @@ const sanitizeTime = (val) => {
     if (val === '' || val === null || val === undefined) return null;
     return val;
 };
+
+// --- MAPPERS (Adapters) ---
+// These translate between UI objects and DB columns
+
+const mapTaskToDB = (task) => ({
+    taskId: task.taskId,
+    title: task.userName, // Storing userName in title for now
+    description: JSON.stringify({
+        memo: task.assignMemo,
+        startStat: task.startStat,
+        assignTime: task.assignTime,
+        assignDate: task.assignDate,
+        staffComment: task.staffComment,
+        endTime: task.endTime
+    }), // Store extras in description JSON
+    status: task.endStat || 'Pending', // Map endStat to status
+    priority: 'Normal',
+    assignedTo: task.userId,
+    dueDate: sanitizeTime(task.assignDate), // Map assignDate to dueDate
+    roomNo: task.roomNo,
+    hotelId: task.hotelId
+});
+
+const mapTaskFromDB = (dbTask) => {
+    let extras = {};
+    try { extras = JSON.parse(dbTask.description || '{}'); } catch (e) { extras = { memo: dbTask.description }; }
+
+    return {
+        taskId: dbTask.taskId,
+        userName: dbTask.title,
+        assignMemo: extras.memo || '',
+        startStat: extras.startStat || '',
+        assignTime: extras.assignTime || '',
+        assignDate: extras.assignDate || dbTask.dueDate,
+        staffComment: extras.staffComment || '',
+        endTime: extras.endTime || '',
+        endStat: dbTask.status,
+        userId: dbTask.assignedTo,
+        roomNo: dbTask.roomNo,
+        hotelId: dbTask.hotelId
+    };
+};
+
+const mapInvTrnToDB = (trn) => ({
+    id: trn.id,
+    date: sanitizeTime(trn.itemDate), // itemDate -> date
+    itemCode: trn.itemCode,
+    itemPurQty: sanitizeNumeric(trn.itemPurQty),
+    itemUseQty: sanitizeNumeric(trn.itemUseQty),
+    remarks: trn.remark || '', // remark -> remarks
+    hotelId: trn.hotelId || 'H001'
+});
+
+const mapInvTrnFromDB = (dbTrn) => ({
+    id: dbTrn.id,
+    itemDate: dbTrn.date,
+    itemCode: dbTrn.itemCode,
+    itemPurQty: dbTrn.itemPurQty,
+    itemUseQty: dbTrn.itemUseQty,
+    remark: dbTrn.remarks,
+    hotelId: dbTrn.hotelId,
+    // Join with master usually happens in UI, but we return raw here
+    itemName: '' // Placeholder, UI often fills this
+});
+
+const mapLaundryTrnToDB = (trn) => ({
+    id: trn.id,
+    date: sanitizeTime(trn.itemDate), // itemDate -> date
+    itemCode: trn.itemCode,
+    itemQout: sanitizeNumeric(trn.itemQout),
+    itemQin: sanitizeNumeric(trn.itemQin),
+    cleaner: trn.cleaner,
+    remarks: trn.itemStatus || '', // itemStatus -> remarks
+    hotelId: trn.hotelId || 'H001'
+});
+
+const mapLaundryTrnFromDB = (dbTrn) => ({
+    id: dbTrn.id,
+    itemDate: dbTrn.date,
+    itemCode: dbTrn.itemCode,
+    itemQout: dbTrn.itemQout,
+    itemQin: dbTrn.itemQin,
+    cleaner: dbTrn.cleaner,
+    itemStatus: dbTrn.remarks,
+    hotelId: dbTrn.hotelId
+});
+
+const mapPettyCashToDB = (pc) => ({
+    id: pc.id,
+    vchNo: pc.vchNo,
+    date: sanitizeTime(pc.date),
+    description: pc.description + (pc.mode ? ` | Mode: ${pc.mode}` : '') + (pc.paidTo ? ` | PaidTo: ${pc.paidTo}` : ''),
+    category: pc.category,
+    amount: sanitizeNumeric(pc.amount),
+    type: pc.type,
+    hotelId: pc.hotelId || 'H001'
+});
 
 export const db = {
     users: {
@@ -169,7 +266,8 @@ export const db = {
                 console.error('Error fetching tasks:', error);
                 return [];
             }
-            return predicate ? data.filter(predicate) : data;
+            const mapped = data.map(mapTaskFromDB);
+            return predicate ? mapped.filter(predicate) : mapped;
         },
         getAll: async () => {
             const { data, error } = await supabase.from('tasks').select('*');
@@ -177,15 +275,16 @@ export const db = {
                 console.error('Error fetching tasks:', error);
                 return [];
             }
-            return data || [];
+            return data.map(mapTaskFromDB);
         },
         save: async (task) => {
-            const { data, error } = await supabase.from('tasks').upsert(task).select();
+            const dbTask = mapTaskToDB(task);
+            const { data, error } = await supabase.from('tasks').upsert(dbTask).select();
             if (error) {
                 console.error('Error saving task:', error);
                 throw error;
             }
-            return data[0];
+            return mapTaskFromDB(data[0]);
         },
         delete: async (taskId) => {
             const { error } = await supabase.from('tasks').delete().eq('taskId', taskId);
@@ -250,35 +349,31 @@ export const db = {
                     console.error('Error fetching inventory transactions:', error);
                     return [];
                 }
-                return data || [];
+                return data.map(mapInvTrnFromDB);
             },
             save: async (trn) => {
                 const isNew = !trn.id;
                 const id = trn.id || Date.now().toString();
-                const refinedTrn = { ...trn, id };
+                // Map first, then fix logic if needed, or fix logic then map.
+                // Logic requires standard keys. Let's rely on Mapper to handle structure.
 
-                refinedTrn.itemPurQty = sanitizeNumeric(refinedTrn.itemPurQty) ?? 0;
-                refinedTrn.itemUseQty = sanitizeNumeric(refinedTrn.itemUseQty) ?? 0;
+                const dbTrn = mapInvTrnToDB({ ...trn, id });
 
-                // Logic: if buying, usage is 0. If using, purchase is 0. 
-                // Using sanitizeNumeric to ensure we have numbers for comparison
-                if (refinedTrn.itemPurQty > 0) refinedTrn.itemUseQty = 0;
-                else if (refinedTrn.itemUseQty > 0) refinedTrn.itemPurQty = 0;
+                // Logic: if buying, usage is 0. If using, purchase is 0.
+                if (dbTrn.itemPurQty > 0) dbTrn.itemUseQty = 0;
+                else if (dbTrn.itemUseQty > 0) dbTrn.itemPurQty = 0;
 
-                const { data, error } = await supabase.from('inv_trn').upsert(refinedTrn).select();
+                const { data, error } = await supabase.from('inv_trn').upsert(dbTrn).select();
                 if (error) {
                     console.error('Error saving inventory transaction:', error);
                     throw error;
                 }
 
-                // Update Master quantities (Real-time update logic can be complex, 
-                // but we follow current pattern of updating master alongside trn)
-                const { data: masters, error: mError } = await supabase.from('inv_mast').select('*').eq('itemCode', refinedTrn.itemCode);
-                if (!mError && masters.length > 0) {
-                    // logic placeholder
-                }
+                // Update Master quantities - simplified
+                // In real app, we might use a Trigger or a separate service method
+                // We'll skip local master update here as it complicates "dumb" DB service
 
-                return data[0];
+                return mapInvTrnFromDB(data[0]);
             },
             delete: async (id) => {
                 const { error } = await supabase.from('inv_trn').delete().eq('id', id);
@@ -374,10 +469,9 @@ export const db = {
                 trn.vchNo = `PC-${nextNum.toString().padStart(4, '0')}`;
                 trn.id = Date.now().toString();
             }
-            const trnToSave = { ...trn };
-            trnToSave.amount = sanitizeNumeric(trnToSave.amount) ?? 0;
+            const dbTrn = mapPettyCashToDB(trn);
 
-            const { data, error } = await supabase.from('petty_cash').upsert(trnToSave).select();
+            const { data, error } = await supabase.from('petty_cash').upsert(dbTrn).select();
             if (error) {
                 console.error('Error saving petty cash:', error);
                 throw error;
