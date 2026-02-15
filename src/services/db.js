@@ -25,6 +25,12 @@ const sanitizeNumeric = (val) => {
     return isNaN(num) ? null : num;
 };
 
+// Helper to sanitize Time/Date values
+const sanitizeTime = (val) => {
+    if (val === '' || val === null || val === undefined) return null;
+    return val;
+};
+
 export const db = {
     users: {
         find: async (predicate) => {
@@ -140,6 +146,13 @@ export const db = {
                     bookingToSave[field] = sanitizeNumeric(bookingToSave[field]);
                 }
             });
+
+            // Sanitize DATE/TIME fields to prevent empty string errors
+            // Specifically arrivalTime which defaults to '' in UI
+            if ('arrivalTime' in bookingToSave) bookingToSave.arrivalTime = sanitizeTime(bookingToSave.arrivalTime);
+            if ('checkInDate' in bookingToSave) bookingToSave.checkInDate = sanitizeTime(bookingToSave.checkInDate);
+            if ('checkOutDate' in bookingToSave) bookingToSave.checkOutDate = sanitizeTime(bookingToSave.checkOutDate);
+            if ('bookingDate' in bookingToSave) bookingToSave.bookingDate = sanitizeTime(bookingToSave.bookingDate);
 
             const { data, error } = await supabase.from('bookings').upsert(bookingToSave).select();
             if (error) {
