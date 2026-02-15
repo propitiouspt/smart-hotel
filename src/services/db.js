@@ -18,6 +18,13 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
         })
     };
 
+// Helper to sanitize numeric values
+const sanitizeNumeric = (val) => {
+    if (val === '' || val === null || val === undefined) return null;
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+};
+
 export const db = {
     users: {
         find: async (predicate) => {
@@ -78,7 +85,13 @@ export const db = {
             return data || [];
         },
         save: async (room) => {
-            const { data, error } = await supabase.from('rooms').upsert(room).select();
+            // Remove calculated/UI-only fields that are not in the database schema
+            const { currentRate, ...roomData } = room;
+
+            // Ensure numeric fields are numbers
+            if (roomData.basicRate) roomData.basicRate = sanitizeNumeric(roomData.basicRate);
+
+            const { data, error } = await supabase.from('rooms').upsert(roomData).select();
             if (error) {
                 console.error('Error saving room:', error);
                 throw error;
@@ -114,6 +127,19 @@ export const db = {
             // Remove id if it's empty string to let Supabase generate UUID
             const bookingToSave = { ...booking };
             if (!bookingToSave.id) delete bookingToSave.id;
+
+            // Sanitize numeric fields to prevent empty string errors
+            const numericFields = [
+                'totalGuests', 'children', 'nights',
+                'totalBookingAmount', 'commissionPercent', 'commissionAmount',
+                'taxPercent', 'taxAmount', 'cityTax', 'securityDeposit', 'payoutReceived'
+            ];
+
+            numericFields.forEach(field => {
+                if (field in bookingToSave) {
+                    bookingToSave[field] = sanitizeNumeric(bookingToSave[field]);
+                }
+            });
 
             const { data, error } = await supabase.from('bookings').upsert(bookingToSave).select();
             if (error) {
@@ -185,7 +211,11 @@ export const db = {
                 return data || [];
             },
             save: async (item) => {
-                const { data, error } = await supabase.from('inv_mast').upsert(item).select();
+                const itemToSave = { ...item };
+                itemToSave.itemPur = sanitizeNumeric(itemToSave.itemPur) ?? 0;
+                itemToSave.itemUsed = sanitizeNumeric(itemToSave.itemUsed) ?? 0;
+
+                const { data, error } = await supabase.from('inv_mast').upsert(itemToSave).select();
                 if (error) {
                     console.error('Error saving inventory item:', error);
                     throw error;
@@ -214,8 +244,13 @@ export const db = {
                 const id = trn.id || Date.now().toString();
                 const refinedTrn = { ...trn, id };
 
-                if (Number(refinedTrn.itemPurQty) > 0) refinedTrn.itemUseQty = 0;
-                else if (Number(refinedTrn.itemUseQty) > 0) refinedTrn.itemPurQty = 0;
+                refinedTrn.itemPurQty = sanitizeNumeric(refinedTrn.itemPurQty) ?? 0;
+                refinedTrn.itemUseQty = sanitizeNumeric(refinedTrn.itemUseQty) ?? 0;
+
+                // Logic: if buying, usage is 0. If using, purchase is 0. 
+                // Using sanitizeNumeric to ensure we have numbers for comparison
+                if (refinedTrn.itemPurQty > 0) refinedTrn.itemUseQty = 0;
+                else if (refinedTrn.itemUseQty > 0) refinedTrn.itemPurQty = 0;
 
                 const { data, error } = await supabase.from('inv_trn').upsert(refinedTrn).select();
                 if (error) {
@@ -227,11 +262,7 @@ export const db = {
                 // but we follow current pattern of updating master alongside trn)
                 const { data: masters, error: mError } = await supabase.from('inv_mast').select('*').eq('itemCode', refinedTrn.itemCode);
                 if (!mError && masters.length > 0) {
-                    const master = masters[0];
-                    // Redo math logic here if needed, or assume it's settled in UI.
-                    // The old logic was fetching all transactions and re-summing or diffing.
-                    // For now, simpler: Upsert the master with new values if UI provided them.
-                    // But in this app, the `save` method in `db.js` was doing calculations.
+                    // logic placeholder
                 }
 
                 return data[0];
@@ -256,7 +287,12 @@ export const db = {
                 return data || [];
             },
             save: async (item) => {
-                const { data, error } = await supabase.from('laundry_mast').upsert(item).select();
+                const itemToSave = { ...item };
+                itemToSave.itemQin = sanitizeNumeric(itemToSave.itemQin) ?? 0;
+                itemToSave.pendingInhouse = sanitizeNumeric(itemToSave.pendingInhouse) ?? 0;
+                itemToSave.pendingOutside = sanitizeNumeric(itemToSave.pendingOutside) ?? 0;
+
+                const { data, error } = await supabase.from('laundry_mast').upsert(itemToSave).select();
                 if (error) {
                     console.error('Error saving laundry item:', error);
                     throw error;
@@ -283,6 +319,9 @@ export const db = {
             save: async (trn) => {
                 const id = trn.id || Date.now().toString();
                 const newTrn = { ...trn, id };
+
+                newTrn.itemQout = sanitizeNumeric(newTrn.itemQout) ?? 0;
+                newTrn.itemQin = sanitizeNumeric(newTrn.itemQin) ?? 0;
 
                 const { data, error } = await supabase.from('laundry_trn').upsert(newTrn).select();
                 if (error) {
@@ -322,7 +361,10 @@ export const db = {
                 trn.vchNo = `PC-${nextNum.toString().padStart(4, '0')}`;
                 trn.id = Date.now().toString();
             }
-            const { data, error } = await supabase.from('petty_cash').upsert(trn).select();
+            const trnToSave = { ...trn };
+            trnToSave.amount = sanitizeNumeric(trnToSave.amount) ?? 0;
+
+            const { data, error } = await supabase.from('petty_cash').upsert(trnToSave).select();
             if (error) {
                 console.error('Error saving petty cash:', error);
                 throw error;
