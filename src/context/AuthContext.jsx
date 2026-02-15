@@ -8,12 +8,31 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage for existing session
-        const storedUser = localStorage.getItem('sh_currentUser');
-        if (storedUser) {
-            setCurrentUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        const initAuth = async () => {
+            const storedUser = localStorage.getItem('sh_currentUser');
+            if (storedUser) {
+                try {
+                    const parsedUser = JSON.parse(storedUser);
+                    // Validate session against Supabase
+                    const user = await db.users.findOne(u => u.userId === parsedUser.userId && u.active);
+
+                    if (user) {
+                        const { password, ...safeUser } = user;
+                        setCurrentUser(safeUser);
+                        // Update local storage with fresh data
+                        localStorage.setItem('sh_currentUser', JSON.stringify(safeUser));
+                    } else {
+                        // Invalid or inactive user, clear session
+                        localStorage.removeItem('sh_currentUser');
+                    }
+                } catch (error) {
+                    console.error('Session validation failed:', error);
+                    localStorage.removeItem('sh_currentUser');
+                }
+            }
+            setLoading(false);
+        };
+        initAuth();
     }, []);
 
     const login = async (userId, password) => {
