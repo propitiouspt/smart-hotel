@@ -362,7 +362,15 @@ export const db = {
             return data && data.length > 0 ? data[0] : null;
         },
         save: async (settings) => {
-            const { data, error } = await supabase.from('settings').upsert(settings).select();
+            let { data, error } = await supabase.from('settings').upsert(settings).select();
+
+            // If currency column doesn't exist yet, retry without it
+            if (error && error.message && error.message.includes('currency')) {
+                console.warn('currency column not found in settings table, saving without it.');
+                const { currency, ...safeSettings } = settings;
+                ({ data, error } = await supabase.from('settings').upsert(safeSettings).select());
+            }
+
             if (error) throw error;
             return data[0];
         }
@@ -505,11 +513,19 @@ export const db = {
                     const totalOutOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
                     const totalInOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
 
-                    await supabase.from('laundry_mast').update({
+                    const updateData = {
                         pendingInhouse: Math.max(0, totalOutInh - totalInInh),
                         pendingOutside: Math.max(0, totalOutOut - totalInOut),
                         itemQin: totalIn
-                    }).eq('itemCode', itemCode);
+                    };
+
+                    let { error: updErr } = await supabase.from('laundry_mast').update(updateData).eq('itemCode', itemCode);
+
+                    // If pending columns missing, retry with only itemQin
+                    if (updErr && updErr.message && (updErr.message.includes('pendingInhouse') || updErr.message.includes('pendingOutside'))) {
+                        console.warn('laundry_mast pending columns missing, updating only itemQin.');
+                        await supabase.from('laundry_mast').update({ itemQin: totalIn }).eq('itemCode', itemCode);
+                    }
                 }
 
                 return mapLaundryTrnFromDB(data[0]);
@@ -527,11 +543,17 @@ export const db = {
                     const totalOutOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
                     const totalInOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
 
-                    await supabase.from('laundry_mast').update({
+                    const updateData = {
                         pendingInhouse: Math.max(0, totalOutInh - totalInInh),
                         pendingOutside: Math.max(0, totalOutOut - totalInOut),
                         itemQin: totalIn
-                    }).eq('itemCode', delTrn.itemCode);
+                    };
+
+                    let { error: updErr } = await supabase.from('laundry_mast').update(updateData).eq('itemCode', delTrn.itemCode);
+
+                    if (updErr && updErr.message && (updErr.message.includes('pendingInhouse') || updErr.message.includes('pendingOutside'))) {
+                        await supabase.from('laundry_mast').update({ itemQin: totalIn }).eq('itemCode', delTrn.itemCode);
+                    }
                 }
             }
         }
