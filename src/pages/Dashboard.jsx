@@ -20,6 +20,7 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
+import clsx from 'clsx';
 
 export default function Dashboard() {
     const { currentUser, currency } = useAuth();
