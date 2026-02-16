@@ -22,7 +22,7 @@ import {
 import { format, addDays } from 'date-fns';
 
 export default function Dashboard() {
-    const { currentUser } = useAuth();
+    const { currentUser, currency } = useAuth();
     const [stats, setStats] = useState({
         arrivals: 0,
         departures: 0,
@@ -117,9 +117,9 @@ export default function Dashboard() {
         { label: 'Out of Service', value: stats.outOfService, icon: Ban, color: 'bg-slate-500' },
         { label: 'Open Tasks', value: stats.maintenanceOpen, icon: Wrench, color: 'bg-amber-500' },
         { label: 'New Bookings', value: stats.newBookings, icon: CalendarCheck, color: 'bg-indigo-500' },
-        { label: 'Revenue (Month)', value: `$${stats.monthlyRevenue.toLocaleString()}`, icon: Wallet, color: 'bg-emerald-600' },
-        { label: 'Avg Daily Rate', value: `$${stats.adr.toFixed(0)}`, icon: TrendingUp, color: 'bg-lime-600' },
-        { label: 'RevPAR', value: `$${stats.revpar.toFixed(0)}`, icon: ClipboardCheck, color: 'bg-teal-600' },
+        { label: 'Revenue (Month)', value: `${currency}${stats.monthlyRevenue.toLocaleString()}`, icon: Wallet, color: 'bg-emerald-600' },
+        { label: 'Avg Daily Rate', value: `${currency}${stats.adr.toFixed(0)}`, icon: TrendingUp, color: 'bg-lime-600' },
+        { label: 'RevPAR', value: `${currency}${stats.revpar.toFixed(0)}`, icon: ClipboardCheck, color: 'bg-teal-600' },
         { label: 'Arrivals Tomorrow', value: stats.expectedTomorrow, icon: Clock, color: 'bg-blue-400' },
         { label: 'VIP Guests', value: stats.vipArrivals, icon: Star, color: 'bg-yellow-500' },
         { label: 'Cancelled Today', value: stats.cancelledToday, icon: XCircle, color: 'bg-rose-500' },

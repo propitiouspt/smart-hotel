@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../services/db';
 import { useAuth } from '../context/AuthContext';
 import { useDevice } from '../hooks/useDevice';
-import { Trash2, Save, Plus, X } from 'lucide-react';
+import { Trash2, Save, Plus, X, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { MessageModal, ConfirmModal } from '../components/Modal';
 
 export default function RoomMaster() {
-    const { currentUser } = useAuth();
+    const { currentUser, currency } = useAuth();
     const { isMobile, isTablet } = useDevice();
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
@@ -111,7 +111,16 @@ export default function RoomMaster() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-800`}>Room Master</h2>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="p-2 rounded-full hover:bg-slate-200 transition"
+                        title="Go Back"
+                    >
+                        <ArrowLeft className="w-5 h-5 text-slate-600" />
+                    </button>
+                    <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-slate-800`}>Room Master</h2>
+                </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     <button
                         onClick={handleNew}
@@ -138,12 +147,13 @@ export default function RoomMaster() {
                     "lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-opacity",
                     isTableLocked && "opacity-50 pointer-events-none"
                 )}>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
                         <table className="w-full text-left text-sm min-w-[500px]">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
                                     <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Room</th>
                                     <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Type</th>
+                                    <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Basic Rate</th>
                                     <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Floor</th>
                                     <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Status</th>
                                     <th className="px-4 sm:px-6 py-4 font-semibold text-slate-700">Condition</th>
@@ -161,6 +171,7 @@ export default function RoomMaster() {
                                     >
                                         <td className="px-4 sm:px-6 py-4 font-medium">{room.roomNo}</td>
                                         <td className="px-4 sm:px-6 py-4">{room.roomType}</td>
+                                        <td className="px-4 sm:px-6 py-4 font-mono text-slate-600">{currency}{room.basicRate}</td>
                                         <td className="px-4 sm:px-6 py-4">{room.floor}</td>
                                         <td className="px-4 sm:px-6 py-4">
                                             <span className={clsx(

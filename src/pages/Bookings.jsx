@@ -10,7 +10,7 @@ import FilterDialog from '../components/FilterDialog';
 import { Filter } from 'lucide-react';
 
 export default function Bookings() {
-    const { currentUser } = useAuth();
+    const { currentUser, currency } = useAuth();
     const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [rooms, setRooms] = useState([]);
@@ -22,7 +22,7 @@ export default function Bookings() {
     const [printMode, setPrintMode] = useState('NONE'); // 'NONE', 'SINGLE', 'REGISTER'
     const [showFilters, setShowFilters] = useState(false);
     const [appliedFilters, setAppliedFilters] = useState({
-        dateType: 'bookingDate',
+        dateType: 'checkInDate',
         startDate: format(new Date(), 'yyyy-MM-dd'),
         endDate: format(new Date(new Date().setDate(new Date().getDate() + 30)), 'yyyy-MM-dd'),
         channel: 'All'
@@ -442,7 +442,12 @@ export default function Bookings() {
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.checkInDate}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.checkOutDate}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.nights}</td>
-                                    <td className="px-4 py-2 border-r border-slate-200">{booking.totalBookingAmount}</td>
+                                    <td className="px-4 py-2 border-r border-slate-200">
+                                        <div className="col-span-12 font-bold text-slate-800 flex justify-between items-center text-sm bg-slate-100 p-2 rounded">
+                                            <span>Start Date: {format(new Date(booking.checkInDate), 'dd MMM yyyy')}</span>
+                                            <span className="text-blue-600 bg-white px-2 py-1 rounded shadow-sm">Total: {currency}{booking.totalBookingAmount}</span>
+                                        </div>
+                                    </td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.commissionAmount || 0}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.taxAmount || 0}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.cityTax || 0}</td>

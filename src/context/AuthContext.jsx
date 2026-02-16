@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
+    const [currency, setCurrency] = useState('$'); // Default currency
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -21,6 +22,12 @@ export const AuthProvider = ({ children }) => {
                         setCurrentUser(safeUser);
                         // Update local storage with fresh data
                         localStorage.setItem('sh_currentUser', JSON.stringify(safeUser));
+
+                        // Fetch Settings for Currency
+                        const settings = await db.settings.get(safeUser.hotelId);
+                        if (settings && settings.currency) {
+                            setCurrency(settings.currency);
+                        }
                     } else {
                         // Invalid or inactive user, clear session
                         localStorage.removeItem('sh_currentUser');
@@ -42,6 +49,12 @@ export const AuthProvider = ({ children }) => {
             const { password, ...safeUser } = user;
             setCurrentUser(safeUser);
             localStorage.setItem('sh_currentUser', JSON.stringify(safeUser));
+
+            // Fetch Settings for Currency
+            const settings = await db.settings.get(safeUser.hotelId);
+            if (settings && settings.currency) {
+                setCurrency(settings.currency);
+            }
             return { success: true };
         }
         return { success: false, message: 'Invalid credentials or inactive account' };
@@ -53,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ currentUser, login, logout, loading }}>
+        <AuthContext.Provider value={{ currentUser, currency, login, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

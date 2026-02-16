@@ -20,7 +20,7 @@ import PettyCashTransactionDialog from '../components/PettyCashTransactionDialog
 import { ConfirmModal } from '../components/Modal';
 
 export default function PettyCash() {
-    const { currentUser } = useAuth();
+    const { currentUser, currency } = useAuth();
     const { isMobile } = useDevice();
     const [transactions, setTransactions] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -103,7 +103,7 @@ export default function PettyCash() {
                             </div>
                         </div>
                         <div class="amount-box">
-                            AMOUNT: RS. ${Number(trn.amount).toLocaleString()}
+                            AMOUNT: ${hotelSettings?.currency || 'RS.'} ${Number(trn.amount).toLocaleString()}
                         </div>
                         <div class="signatures">
                             <div class="sig-line">Receiver's Signature</div>
@@ -178,19 +178,19 @@ export default function PettyCash() {
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-bold text-slate-400 uppercase">Total Receipts</p>
                     <p className="text-2xl font-black text-emerald-600">
-                        RS. {transactions.filter(t => t.type === 'Receipt').reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString()}
+                        {currency} {transactions.filter(t => t.type === 'Receipt').reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString()}
                     </p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-bold text-slate-400 uppercase">Total Payments</p>
                     <p className="text-2xl font-black text-rose-600">
-                        RS. {transactions.filter(t => t.type === 'Payment').reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString()}
+                        {currency} {transactions.filter(t => t.type === 'Payment').reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString()}
                     </p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm bg-emerald-50/30">
                     <p className="text-xs font-bold text-slate-400 uppercase">Cash In Hand</p>
                     <p className="text-2xl font-black text-slate-900">
-                        RS. {runningBalance.toLocaleString()}
+                        {currency} {runningBalance.toLocaleString()}
                     </p>
                 </div>
             </div>

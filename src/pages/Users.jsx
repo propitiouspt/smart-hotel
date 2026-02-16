@@ -29,7 +29,8 @@ export default function Users() {
         address: '',
         contactNo: '',
         email: '',
-        vatNo: ''
+        vatNo: '',
+        currency: '$'
     });
 
     const loadData = async () => {
@@ -363,6 +364,20 @@ export default function Users() {
                                     onChange={(e) => setHotelSettings({ ...hotelSettings, email: e.target.value })}
                                     required
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-tight">Currency Symbol</label>
+                                <select
+                                    className="w-full px-4 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none font-sans"
+                                    value={hotelSettings.currency || '$'}
+                                    onChange={(e) => setHotelSettings({ ...hotelSettings, currency: e.target.value })}
+                                >
+                                    <option value="$">$ (Dollar)</option>
+                                    <option value="€">€ (Euro)</option>
+                                    <option value="£">£ (Pound)</option>
+                                    <option value="₹">₹ (Rupee)</option>
+                                    <option value="¥">¥ (Yen)</option>
+                                </select>
                             </div>
                             <div className="pt-4 flex gap-3">
                                 <button

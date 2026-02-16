@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit, Trash2, Search } from 'lucide-react';
+import { X, Plus, Edit, Trash2, Search, Printer } from 'lucide-react';
 import { db } from '../services/db';
 import { MessageModal, ConfirmModal } from './Modal';
 import clsx from 'clsx';
@@ -65,6 +65,10 @@ export default function InventoryMasterDialog({ show, onClose }) {
         }
     };
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     const resetForm = () => {
         setFormData({ itemCode: '', itemName: '', category: '', itemOpstock: 0 });
         setIsEditing(false);
@@ -108,14 +112,28 @@ export default function InventoryMasterDialog({ show, onClose }) {
             <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
                     <h3 className="font-bold text-lg">Inventory Master</h3>
-                    <button onClick={onClose} className="hover:text-slate-300 transition-colors">
-                        <X size={24} />
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={handlePrint} className="hover:text-slate-300 transition-colors" title="Print Report">
+                            <Printer size={20} />
+                        </button>
+                        <button onClick={onClose} className="hover:text-slate-300 transition-colors">
+                            <X size={24} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Print Header */}
+                <div className="hidden print:block p-8 text-center border-b-2 border-slate-800">
+                    <h1 className="text-3xl font-black uppercase">Inventory Master Report</h1>
+                    <p className="text-slate-500">Smart Hotel Management System</p>
+                    <div className="mt-2 text-sm text-slate-400">
+                        Generated on: {new Date().toLocaleDateString()}
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-auto p-6 flex flex-col md:flex-row gap-6">
-                    {/* Add/Edit Form */}
-                    <div className="w-full md:w-1/3 space-y-4">
+                    {/* Add/Edit Form - HIDDEN ON PRINT */}
+                    <div className="w-full md:w-1/3 space-y-4 print:hidden">
                         <h4 className="font-bold text-slate-700 border-b pb-2">
                             {isEditing ? 'Edit Item' : 'New Item'}
                         </h4>
@@ -199,8 +217,8 @@ export default function InventoryMasterDialog({ show, onClose }) {
                     </div>
 
                     {/* Items List */}
-                    <div className="w-full md:w-2/3 flex flex-col h-full bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                        <div className="p-4 border-b bg-white flex items-center gap-2">
+                    <div className="w-full md:w-2/3 flex flex-col h-full bg-slate-50 rounded border border-slate-200 overflow-hidden print:w-full print:border-none print:bg-white">
+                        <div className="p-4 border-b bg-white flex items-center gap-2 print:hidden">
                             <Search size={18} className="text-slate-400" />
                             <input
                                 type="text"
@@ -221,7 +239,7 @@ export default function InventoryMasterDialog({ show, onClose }) {
                                         <th className="px-4 py-3 border-b border-slate-200 text-right font-bold">In</th>
                                         <th className="px-4 py-3 border-b border-slate-200 text-right font-bold">Out</th>
                                         <th className="px-4 py-3 border-b border-slate-200 text-right font-bold">Net</th>
-                                        <th className="px-4 py-3 border-b border-slate-200 text-center font-bold">Actions</th>
+                                        <th className="px-4 py-3 border-b border-slate-200 text-center font-bold print:hidden">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white">
@@ -236,7 +254,7 @@ export default function InventoryMasterDialog({ show, onClose }) {
                                                 <td className="px-4 py-2 text-right text-green-600 font-bold">+{item.itemPur || 0}</td>
                                                 <td className="px-4 py-2 text-right text-red-600 font-bold">-{item.itemUsed || 0}</td>
                                                 <td className="px-4 py-2 text-right font-black text-slate-900">{netBalance}</td>
-                                                <td className="px-4 py-2">
+                                                <td className="px-4 py-2 print:hidden">
                                                     <div className="flex justify-center gap-2">
                                                         <button onClick={() => handleEdit(item)} className="p-1 text-blue-600 hover:bg-blue-50 rounded">
                                                             <Edit size={16} />
@@ -261,7 +279,7 @@ export default function InventoryMasterDialog({ show, onClose }) {
                 </div>
 
                 {/* Status Footer */}
-                <div className="bg-slate-100 px-6 py-2 border-t text-[10px] text-slate-500 flex justify-between">
+                <div className="bg-slate-100 px-6 py-2 border-t text-[10px] text-slate-500 flex justify-between print:hidden">
                     <span>Double click on item to edit</span>
                     <span>Total Items: {items.length}</span>
                 </div>
@@ -311,6 +329,23 @@ export default function InventoryMasterDialog({ show, onClose }) {
                 onConfirm={() => handleDelete(confirmDelete)}
                 onCancel={() => setConfirmDelete(null)}
             />
+            <style>{`
+                @media print {
+                    @page { size: landscape; margin: 0; }
+                    body { visibility: hidden; background: white; }
+                    .fixed.inset-0 { position: static; background: white; z-index: auto; }
+                    .fixed.inset-0 > div { box-shadow: none; max-width: none; max-height: none; width: 100%; border-radius: 0; animation: none; }
+                    .bg-slate-800 { display: none; } /* Hide Header */
+                    .overflow-auto { overflow: visible !important; }
+                    table { width: 100% !important; border-collapse: collapse; }
+                    th, td { border: 1px solid #ddd !important; padding: 8px !important; font-size: 10pt; }
+                    thead { display: table-header-group; }
+                    tbody { display: table-row-group; }
+                    body * { visibility: hidden; }
+                    .fixed.inset-0, .fixed.inset-0 * { visibility: visible; }
+                    .fixed.inset-0 { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+                }
+            `}</style>
         </div>
     );
 }

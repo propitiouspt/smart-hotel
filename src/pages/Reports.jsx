@@ -7,7 +7,7 @@ import { Printer, FileText, Eye, Filter } from 'lucide-react';
 import FilterDialog from '../components/FilterDialog';
 
 export default function Reports() {
-    const { currentUser } = useAuth();
+    const { currentUser, currency } = useAuth();
     const { isMobile, isTablet } = useDevice();
     const isInvestor = currentUser?.userType === 'Investors';
     const [activeTab, setActiveTab] = useState(isInvestor ? 'mis' : 'season'); // Default to MIS for Investors
@@ -426,7 +426,7 @@ export default function Reports() {
                                 <div className="text-sm text-green-600/80">Rooms Available</div>
                             </div>
                             <div className="p-4 bg-slate-50 rounded-xl">
-                                <div className="text-3xl font-bold text-slate-700">${mis.revenue}</div>
+                                <div className="text-3xl font-bold text-slate-700">{currency}{mis.revenue}</div>
                                 <div className="text-sm text-slate-500">Today's Revenue (Est)</div>
                             </div>
                         </div>
@@ -475,7 +475,7 @@ export default function Reports() {
                                             <td className="px-4 py-4 text-right">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs text-slate-500 uppercase">Today's Revenue</span>
-                                                    <span className="text-2xl text-blue-800 font-black">${mis.revenue.toLocaleString()}</span>
+                                                    <span className="text-2xl text-blue-800 font-black">{currency}{mis.revenue.toLocaleString()}</span>
                                                 </div>
                                             </td>
                                         </tr>
