@@ -388,12 +388,21 @@ export const db = {
                     itemCode: item.itemCode,
                     itemName: item.itemName,
                     unit: item.category || '',
-                    itemOpstock: sanitizeNumeric(item.itemOpstock),
                     itemPur: sanitizeNumeric(item.itemPur),
                     itemUsed: sanitizeNumeric(item.itemUsed),
                     hotelId: item.hotelId || 'H001'
                 };
-                const { data, error } = await supabase.from('inv_mast').upsert(dbItem).select();
+
+                // Try with itemOpstock (requires ALTER TABLE to have been run)
+                const withOpstock = { ...dbItem, itemOpstock: sanitizeNumeric(item.itemOpstock) };
+                let { data, error } = await supabase.from('inv_mast').upsert(withOpstock).select();
+
+                // If column doesn't exist yet, retry without it
+                if (error && error.message && error.message.includes('itemOpstock')) {
+                    console.warn('itemOpstock column not found, saving without it.');
+                    ({ data, error } = await supabase.from('inv_mast').upsert(dbItem).select());
+                }
+
                 if (error) { console.error('Inv master save:', error); throw error; }
                 return data[0];
             },
