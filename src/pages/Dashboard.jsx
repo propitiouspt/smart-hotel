@@ -89,6 +89,19 @@ export default function Dashboard() {
         };
 
         fetchStats();
+
+        // Subscribe to all relevant tables
+        const bSub = db.subscribe('bookings', fetchStats);
+        const rSub = db.subscribe('rooms', fetchStats);
+        const tSub = db.subscribe('tasks', fetchStats);
+        const lSub = db.subscribe('laundry_mast', fetchStats);
+
+        return () => {
+            bSub.unsubscribe();
+            rSub.unsubscribe();
+            tSub.unsubscribe();
+            lSub.unsubscribe();
+        };
     }, [currentUser]);
 
     const SectionHeader = ({ title }) => (

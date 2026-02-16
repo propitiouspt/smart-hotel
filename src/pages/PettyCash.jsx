@@ -37,6 +37,9 @@ export default function PettyCash() {
             await loadTransactions();
         };
         init();
+
+        const sub = db.subscribe('petty_cash', () => loadTransactions());
+        return () => sub.unsubscribe();
     }, [currentUser]);
 
     const loadTransactions = async () => {

@@ -99,6 +99,15 @@ export default function Bookings() {
 
     useEffect(() => {
         loadData();
+
+        // Subscribe to real-time updates
+        const bookingSub = db.subscribe('bookings', () => loadData());
+        const roomSub = db.subscribe('rooms', () => loadData());
+
+        return () => {
+            bookingSub.unsubscribe();
+            roomSub.unsubscribe();
+        };
     }, [currentUser, appliedFilters]);
 
     // NIGHTS Calculation

@@ -38,6 +38,14 @@ export default function Inventory() {
             await loadTransactions();
         };
         init();
+
+        const trnSub = db.subscribe('inv_trn', () => loadTransactions());
+        const mastSub = db.subscribe('inv_mast', () => loadTransactions());
+
+        return () => {
+            trnSub.unsubscribe();
+            mastSub.unsubscribe();
+        };
     }, [currentUser]);
 
     const loadTransactions = async () => {

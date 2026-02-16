@@ -41,6 +41,14 @@ export default function Laundry() {
             await loadTransactions();
         };
         init();
+
+        const trnSub = db.subscribe('laundry_trn', () => loadTransactions());
+        const mastSub = db.subscribe('laundry_mast', () => loadTransactions());
+
+        return () => {
+            trnSub.unsubscribe();
+            mastSub.unsubscribe();
+        };
     }, [currentUser]);
 
     const loadTransactions = async () => {

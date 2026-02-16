@@ -39,6 +39,9 @@ export default function RoomMaster() {
 
     useEffect(() => {
         loadRooms();
+
+        const sub = db.subscribe('rooms', () => loadRooms());
+        return () => sub.unsubscribe();
     }, [currentUser]);
 
     // Handlers

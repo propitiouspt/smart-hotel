@@ -40,6 +40,14 @@ export default function Housekeeping() {
 
     useEffect(() => {
         loadData();
+
+        const taskSub = db.subscribe('tasks', () => loadData());
+        const roomSub = db.subscribe('rooms', () => loadData());
+
+        return () => {
+            taskSub.unsubscribe();
+            roomSub.unsubscribe();
+        };
     }, [currentUser]);
 
     // Admin: Assign Task Logic

@@ -588,5 +588,14 @@ export const db = {
             const { error } = await supabase.from('petty_cash').delete().eq('vchNo', vchNo);
             if (error) throw error;
         }
+    },
+
+    subscribe: (table, callback) => {
+        return supabase
+            .channel(`public:${table}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: table }, payload => {
+                callback(payload);
+            })
+            .subscribe();
     }
 };
