@@ -110,41 +110,47 @@ export default function Dashboard() {
         </div>
     );
 
-    const StatRow = ({ label, value }) => (
-        <div className="grid grid-cols-2 border-b border-slate-200 hover:bg-slate-50 transition-colors">
-            <div className="px-4 py-2 text-slate-700 border-r border-slate-200 font-medium">{label}</div>
-            <div className="px-4 py-2 text-slate-800 font-bold text-right sm:text-left">{value}</div>
+    const StatRow = ({ label, value, index }) => (
+        <div
+            className={clsx(
+                "grid grid-cols-2 border-b border-slate-200 transition-colors",
+                index % 2 === 0 ? "bg-white" : "bg-slate-50/50",
+                "hover:bg-blue-50/30"
+            )}
+        >
+            <div className="px-4 py-2.5 text-slate-600 border-r border-slate-200 text-[13px] font-medium flex items-center">{label}</div>
+            <div className="px-4 py-2.5 text-slate-800 font-bold text-right sm:text-left text-sm flex items-center justify-end sm:justify-start">{value}</div>
         </div>
     );
 
     return (
-        <div className="space-y-6 max-w-4xl">
-            <div className="bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden">
+        <div className="space-y-6 max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-300 overflow-hidden">
                 <SectionHeader title="Today :" />
-                <div className="divide-y divide-slate-100">
-                    <StatRow label="New bookings , No's" value={stats.today.newBookings} />
-                    <StatRow label="New Booking Amount" value={`${currency}${stats.today.newAmount.toLocaleString()}`} />
-                    <StatRow label="Check out Done" value={stats.today.checkoutDone} />
-                    <StatRow label="Check out pending" value={stats.today.checkoutPending} />
-                    <StatRow label="Check in Done : no's" value={stats.today.checkinDone} />
-                    <StatRow label="Check in Pending" value={stats.today.checkinPending} />
+                <div className="flex flex-col">
+                    <StatRow label="New bookings , No's" value={stats.today.newBookings} index={0} />
+                    <StatRow label="New Booking Amount" value={`${currency}${stats.today.newAmount.toLocaleString()}`} index={1} />
+                    <StatRow label="Check out Done" value={stats.today.checkoutDone} index={2} />
+                    <StatRow label="Check out pending" value={stats.today.checkoutPending} index={3} />
+                    <StatRow label="Check in Done : no's" value={stats.today.checkinDone} index={4} />
+                    <StatRow label="Check in Pending" value={stats.today.checkinPending} index={5} />
                 </div>
 
                 <SectionHeader title="Tomorrow :" />
-                <div className="divide-y divide-slate-100">
-                    <StatRow label="Check out" value={stats.tomorrow.checkout} />
-                    <StatRow label="Check in" value={stats.tomorrow.checkin} />
+                <div className="flex flex-col">
+                    <StatRow label="Check out" value={stats.tomorrow.checkout} index={0} />
+                    <StatRow label="Check in" value={stats.tomorrow.checkin} index={1} />
                 </div>
 
                 <SectionHeader title="In General :" />
-                <div className="divide-y divide-slate-100">
-                    <StatRow label="Rooms occupied" value={stats.general.occupied} />
-                    <StatRow label="Available rooms" value={stats.general.available} />
-                    <StatRow label="Dirty/Semi cleaned rooms" value={stats.general.dirtySemi} />
-                    <StatRow label="Cleaned Rooms" value={stats.general.clean} />
-                    <StatRow label="Pending House keeping Task" value={stats.general.pendingTasks} />
-                    <StatRow label="Laundry Pending with Outsourced" value={stats.general.laundryOutside} />
-                    <StatRow label="Laundry Pending Inhouse" value={stats.general.laundryInhouse} />
+                <div className="flex flex-col">
+                    <StatRow label="Rooms occupied" value={stats.general.occupied} index={0} />
+                    <StatRow label="Available rooms" value={stats.general.available} index={1} />
+                    <StatRow label="Dirty/Semi cleaned rooms" value={stats.general.dirtySemi} index={2} />
+                    <StatRow label="Cleaned Rooms" value={stats.general.clean} index={3} />
+                    <StatRow label="Pending House keeping Task" value={stats.general.pendingTasks} index={4} />
+                    <StatRow label="Laundry Pending with Outsourced" value={stats.general.laundryOutside} index={5} />
+                    <StatRow label="Laundry Pending Inhouse" value={stats.general.laundryInhouse} index={6} />
                 </div>
             </div>
 
