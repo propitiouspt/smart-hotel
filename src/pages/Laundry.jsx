@@ -66,9 +66,9 @@ export default function Laundry() {
     };
 
     const filteredTransactions = transactions.filter(t =>
-        t.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.itemCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.itemStatus?.toLowerCase().includes(searchTerm.toLowerCase())
+        (t.itemName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.itemCode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.itemStatus || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

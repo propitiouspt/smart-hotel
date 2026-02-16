@@ -61,9 +61,9 @@ export default function Inventory() {
     };
 
     const filteredTransactions = transactions.filter(t =>
-        t.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.itemCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.remark?.toLowerCase().includes(searchTerm.toLowerCase())
+        (t.itemName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.itemCode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.remark || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

@@ -118,9 +118,10 @@ export default function PettyCash() {
     };
 
     const filteredTransactions = transactions.filter(t =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.vchNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.remark?.toLowerCase().includes(searchTerm.toLowerCase())
+        (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.vchNo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.remark || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => new Date(b.date) - new Date(a.date));
 
     // Calculate Running Balance for Statement Style
