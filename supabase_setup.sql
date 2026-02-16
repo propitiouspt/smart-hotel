@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS inv_mast (
     "itemCode" TEXT PRIMARY KEY,
     "itemName" TEXT,
     unit TEXT,
+    "itemOpstock" NUMERIC DEFAULT 0,
     "itemPur" NUMERIC DEFAULT 0,
     "itemUsed" NUMERIC DEFAULT 0,
     "hotelId" TEXT

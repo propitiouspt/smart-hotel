@@ -373,23 +373,22 @@ export const db = {
             getAll: async () => {
                 const { data, error } = await supabase.from('inv_mast').select('*');
                 if (error) { console.error('Inv master getAll:', error); return []; }
-                // Map DB columns back to UI fields
                 return (data || []).map(d => ({
                     itemCode: d.itemCode || '',
                     itemName: d.itemName || '',
-                    category: d.unit || '',       // DB 'unit' → UI 'category'
-                    itemOpstock: 0,               // Not stored in DB, always 0
+                    category: d.unit || '',
+                    itemOpstock: d.itemOpstock || 0,
                     itemPur: d.itemPur || 0,
                     itemUsed: d.itemUsed || 0,
                     hotelId: d.hotelId || 'H001'
                 }));
             },
             save: async (item) => {
-                // Map UI fields to DB columns
                 const dbItem = {
                     itemCode: item.itemCode,
                     itemName: item.itemName,
-                    unit: item.category || '',     // UI 'category' → DB 'unit'
+                    unit: item.category || '',
+                    itemOpstock: sanitizeNumeric(item.itemOpstock),
                     itemPur: sanitizeNumeric(item.itemPur),
                     itemUsed: sanitizeNumeric(item.itemUsed),
                     hotelId: item.hotelId || 'H001'
@@ -405,16 +404,11 @@ export const db = {
         },
         transactions: {
             getAll: async () => {
-                // 1. Fetch transactions
                 const { data: trnData, error: trnErr } = await supabase.from('inv_trn').select('*');
                 if (trnErr) { console.error('Inv trn getAll:', trnErr); return []; }
-
-                // 2. Fetch master items to get itemName
                 const { data: masterData } = await supabase.from('inv_mast').select('itemCode, itemName');
                 const masterLookup = {};
                 (masterData || []).forEach(m => { masterLookup[m.itemCode] = m.itemName; });
-
-                // 3. Map and enrich with itemName
                 return (trnData || []).map(t => mapInvTrnFromDB(t, masterLookup));
             },
             save: async (trn) => {
@@ -426,11 +420,31 @@ export const db = {
 
                 const { data, error } = await supabase.from('inv_trn').upsert(dbTrn).select();
                 if (error) { console.error('Inv trn save:', error); throw error; }
+
+                // ── Auto-update master totals ──
+                const itemCode = dbTrn.itemCode;
+                if (itemCode) {
+                    const { data: allTrns } = await supabase.from('inv_trn').select('itemPurQty, itemUseQty').eq('itemCode', itemCode);
+                    const totalPur = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemPurQty) || 0), 0);
+                    const totalUsed = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemUseQty) || 0), 0);
+                    await supabase.from('inv_mast').update({ itemPur: totalPur, itemUsed: totalUsed }).eq('itemCode', itemCode);
+                }
+
                 return mapInvTrnFromDB(data[0]);
             },
             delete: async (id) => {
+                // Get the item code before deleting so we can recalculate
+                const { data: delTrn } = await supabase.from('inv_trn').select('itemCode').eq('id', id).single();
                 const { error } = await supabase.from('inv_trn').delete().eq('id', id);
                 if (error) throw error;
+
+                // Recalculate master totals after delete
+                if (delTrn?.itemCode) {
+                    const { data: allTrns } = await supabase.from('inv_trn').select('itemPurQty, itemUseQty').eq('itemCode', delTrn.itemCode);
+                    const totalPur = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemPurQty) || 0), 0);
+                    const totalUsed = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemUseQty) || 0), 0);
+                    await supabase.from('inv_mast').update({ itemPur: totalPur, itemUsed: totalUsed }).eq('itemCode', delTrn.itemCode);
+                }
             }
         }
     },
@@ -458,16 +472,11 @@ export const db = {
         },
         transactions: {
             getAll: async () => {
-                // 1. Fetch transactions
                 const { data: trnData, error: trnErr } = await supabase.from('laundry_trn').select('*');
                 if (trnErr) { console.error('Laundry trn getAll:', trnErr); return []; }
-
-                // 2. Fetch master items to get itemName
                 const { data: masterData } = await supabase.from('laundry_mast').select('itemCode, itemName');
                 const masterLookup = {};
                 (masterData || []).forEach(m => { masterLookup[m.itemCode] = m.itemName; });
-
-                // 3. Map and enrich with itemName
                 return (trnData || []).map(t => mapLaundryTrnFromDB(t, masterLookup));
             },
             save: async (trn) => {
@@ -476,11 +485,35 @@ export const db = {
 
                 const { data, error } = await supabase.from('laundry_trn').upsert(dbTrn).select();
                 if (error) { console.error('Laundry trn save:', error); throw error; }
+
+                // ── Auto-update laundry master totals ──
+                const itemCode = dbTrn.itemCode;
+                if (itemCode) {
+                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin').eq('itemCode', itemCode);
+                    const totalOut = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQout) || 0), 0);
+                    const totalIn = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQin) || 0), 0);
+                    await supabase.from('laundry_mast').update({
+                        pendingOutside: totalOut - totalIn,
+                        itemQin: totalIn
+                    }).eq('itemCode', itemCode);
+                }
+
                 return mapLaundryTrnFromDB(data[0]);
             },
             delete: async (id) => {
+                const { data: delTrn } = await supabase.from('laundry_trn').select('itemCode').eq('id', id).single();
                 const { error } = await supabase.from('laundry_trn').delete().eq('id', id);
                 if (error) throw error;
+
+                if (delTrn?.itemCode) {
+                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin').eq('itemCode', delTrn.itemCode);
+                    const totalOut = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQout) || 0), 0);
+                    const totalIn = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQin) || 0), 0);
+                    await supabase.from('laundry_mast').update({
+                        pendingOutside: totalOut - totalIn,
+                        itemQin: totalIn
+                    }).eq('itemCode', delTrn.itemCode);
+                }
             }
         }
     },
