@@ -99,8 +99,8 @@ export default function InventoryMasterDialog({ show, onClose }) {
     if (!show) return null;
 
     const filteredItems = items.filter(item =>
-        item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.itemName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.itemCode || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

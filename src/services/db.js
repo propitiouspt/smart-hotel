@@ -372,14 +372,29 @@ export const db = {
         master: {
             getAll: async () => {
                 const { data, error } = await supabase.from('inv_mast').select('*');
-                if (error) return [];
-                return data || [];
+                if (error) { console.error('Inv master getAll:', error); return []; }
+                // Map DB columns back to UI fields
+                return (data || []).map(d => ({
+                    itemCode: d.itemCode || '',
+                    itemName: d.itemName || '',
+                    category: d.unit || '',       // DB 'unit' → UI 'category'
+                    itemOpstock: 0,               // Not stored in DB, always 0
+                    itemPur: d.itemPur || 0,
+                    itemUsed: d.itemUsed || 0,
+                    hotelId: d.hotelId || 'H001'
+                }));
             },
             save: async (item) => {
-                const itemToSave = { ...item };
-                itemToSave.itemPur = sanitizeNumeric(itemToSave.itemPur);
-                itemToSave.itemUsed = sanitizeNumeric(itemToSave.itemUsed);
-                const { data, error } = await supabase.from('inv_mast').upsert(itemToSave).select();
+                // Map UI fields to DB columns
+                const dbItem = {
+                    itemCode: item.itemCode,
+                    itemName: item.itemName,
+                    unit: item.category || '',     // UI 'category' → DB 'unit'
+                    itemPur: sanitizeNumeric(item.itemPur),
+                    itemUsed: sanitizeNumeric(item.itemUsed),
+                    hotelId: item.hotelId || 'H001'
+                };
+                const { data, error } = await supabase.from('inv_mast').upsert(dbItem).select();
                 if (error) { console.error('Inv master save:', error); throw error; }
                 return data[0];
             },
