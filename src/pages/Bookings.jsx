@@ -25,7 +25,8 @@ export default function Bookings() {
         dateType: 'checkInDate',
         startDate: format(new Date(), 'yyyy-MM-dd'),
         endDate: format(new Date(new Date().setDate(new Date().getDate() + 30)), 'yyyy-MM-dd'),
-        channel: 'All'
+        channel: 'All',
+        showPast: false
     });
 
     // Modal State
@@ -77,7 +78,7 @@ export default function Bookings() {
 
         // Apply Filters
         if (appliedFilters.startDate && appliedFilters.endDate) {
-            const start = parseISO(appliedFilters.startDate);
+            const start = appliedFilters.showPast ? parseISO('2000-01-01') : parseISO(appliedFilters.startDate);
             const end = parseISO(appliedFilters.endDate);
             bData = bData.filter(b => {
                 const dateToCompare = parseISO(b[appliedFilters.dateType]);
@@ -227,6 +228,16 @@ export default function Bookings() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-lg border border-slate-200 gap-4 print:hidden">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Advance Bookings</h2>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded border border-slate-200 shadow-sm">
+                        <input
+                            type="checkbox"
+                            id="showPast"
+                            checked={appliedFilters.showPast}
+                            onChange={(e) => setAppliedFilters(prev => ({ ...prev, showPast: e.target.checked }))}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-slate-300"
+                        />
+                        <label htmlFor="showPast" className="text-xs font-bold text-slate-600 cursor-pointer whitespace-nowrap">Old Bookings</label>
+                    </div>
                     <button
                         type="button"
                         onClick={handleNew}
@@ -442,11 +453,8 @@ export default function Bookings() {
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.checkInDate}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.checkOutDate}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.nights}</td>
-                                    <td className="px-4 py-2 border-r border-slate-200">
-                                        <div className="col-span-12 font-bold text-slate-800 flex justify-between items-center text-sm bg-slate-100 p-2 rounded">
-                                            <span>Start Date: {format(new Date(booking.checkInDate), 'dd MMM yyyy')}</span>
-                                            <span className="text-blue-600 bg-white px-2 py-1 rounded shadow-sm">Total: {currency}{booking.totalBookingAmount}</span>
-                                        </div>
+                                    <td className="px-4 py-2 border-r border-slate-200 text-right font-bold text-blue-600 whitespace-nowrap">
+                                        {currency}{Number(booking.totalBookingAmount).toLocaleString()}
                                     </td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.commissionAmount || 0}</td>
                                     <td className="px-4 py-2 border-r border-slate-200">{booking.taxAmount || 0}</td>

@@ -498,11 +498,16 @@ export const db = {
                 // ── Auto-update laundry master totals ──
                 const itemCode = dbTrn.itemCode;
                 if (itemCode) {
-                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin').eq('itemCode', itemCode);
-                    const totalOut = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQout) || 0), 0);
+                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin, cleaner').eq('itemCode', itemCode);
                     const totalIn = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQin) || 0), 0);
+                    const totalOutInh = (allTrns || []).reduce((sum, t) => sum + (t.cleaner === 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
+                    const totalInInh = (allTrns || []).reduce((sum, t) => sum + (t.cleaner === 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
+                    const totalOutOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
+                    const totalInOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
+
                     await supabase.from('laundry_mast').update({
-                        pendingOutside: totalOut - totalIn,
+                        pendingInhouse: Math.max(0, totalOutInh - totalInInh),
+                        pendingOutside: Math.max(0, totalOutOut - totalInOut),
                         itemQin: totalIn
                     }).eq('itemCode', itemCode);
                 }
@@ -515,11 +520,16 @@ export const db = {
                 if (error) throw error;
 
                 if (delTrn?.itemCode) {
-                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin').eq('itemCode', delTrn.itemCode);
-                    const totalOut = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQout) || 0), 0);
+                    const { data: allTrns } = await supabase.from('laundry_trn').select('itemQout, itemQin, cleaner').eq('itemCode', delTrn.itemCode);
                     const totalIn = (allTrns || []).reduce((sum, t) => sum + (Number(t.itemQin) || 0), 0);
+                    const totalOutInh = (allTrns || []).reduce((sum, t) => sum + (t.cleaner === 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
+                    const totalInInh = (allTrns || []).reduce((sum, t) => sum + (t.cleaner === 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
+                    const totalOutOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQout) || 0) : 0), 0);
+                    const totalInOut = (allTrns || []).reduce((sum, t) => sum + (t.cleaner !== 'Inhouse' ? (Number(t.itemQin) || 0) : 0), 0);
+
                     await supabase.from('laundry_mast').update({
-                        pendingOutside: totalOut - totalIn,
+                        pendingInhouse: Math.max(0, totalOutInh - totalInInh),
+                        pendingOutside: Math.max(0, totalOutOut - totalInOut),
                         itemQin: totalIn
                     }).eq('itemCode', delTrn.itemCode);
                 }

@@ -38,7 +38,9 @@ export default function Users() {
         const uData = await db.users.getAll();
         setUsers(uData);
         const settings = await db.settings.get(currentUser.hotelId);
-        setHotelSettings(settings);
+        if (settings) {
+            setHotelSettings(prev => ({ ...prev, ...settings }));
+        }
     };
 
     useEffect(() => {
