@@ -284,12 +284,13 @@ export const db = {
         find: async (predicate) => {
             const { data, error } = await supabase.from('rooms').select('*');
             if (error) { console.error('Rooms find:', error); return []; }
-            return predicate ? data.filter(predicate) : data;
+            const sorted = (data || []).sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0));
+            return predicate ? sorted.filter(predicate) : sorted;
         },
         getAll: async () => {
             const { data, error } = await supabase.from('rooms').select('*');
             if (error) { console.error('Rooms getAll:', error); return []; }
-            return data || [];
+            return (data || []).sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0));
         },
         save: async (room) => {
             const { currentRate, ...roomData } = room;
@@ -336,12 +337,13 @@ export const db = {
             const { data, error } = await supabase.from('tasks').select('*');
             if (error) { console.error('Tasks find:', error); return []; }
             const mapped = data.map(mapTaskFromDB);
-            return predicate ? mapped.filter(predicate) : mapped;
+            const sorted = mapped.sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0));
+            return predicate ? sorted.filter(predicate) : sorted;
         },
         getAll: async () => {
             const { data, error } = await supabase.from('tasks').select('*');
             if (error) { console.error('Tasks getAll:', error); return []; }
-            return data.map(mapTaskFromDB);
+            return data.map(mapTaskFromDB).sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0));
         },
         save: async (task) => {
             const dbTask = mapTaskToDB(task);

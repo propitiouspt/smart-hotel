@@ -520,9 +520,12 @@ export default function CheckInOut() {
                             </select>
                             <select name="assignedRoomNo" value={formData.assignedRoomNo} onChange={handleChange} disabled={viewMode === 'VIEW'} className="flex-1 px-1 py-1.5 border border-slate-300 bg-yellow-50 rounded text-xs font-bold">
                                 <option value="">Room</option>
-                                {rooms.filter(r => r.roomType === formData.roomType).map(r => (
-                                    <option key={r.roomNo} value={r.roomNo}>{r.roomNo} ({r.statusOfRoom})</option>
-                                ))}
+                                {rooms
+                                    .filter(r => r.roomType === formData.roomType)
+                                    .sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0))
+                                    .map(r => (
+                                        <option key={r.roomNo} value={r.roomNo}>{r.roomNo} ({r.statusOfRoom})</option>
+                                    ))}
                             </select>
                         </div>
                     </div>

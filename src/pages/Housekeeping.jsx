@@ -155,14 +155,16 @@ export default function Housekeeping() {
                                 onChange={e => setAssignForm({ ...assignForm, roomNo: e.target.value })}
                             >
                                 <option value="">Select Room</option>
-                                {rooms.map(r => {
-                                    const isAssigned = tasks.some(t => t.roomNo === r.roomNo && t.endStat !== 'Ready');
-                                    return (
-                                        <option key={r.roomNo} value={r.roomNo}>
-                                            {r.roomNo} | {r.cleaningStatus} | {isAssigned ? 'Assigned' : 'Not Assigned'}
-                                        </option>
-                                    );
-                                })}
+                                {rooms
+                                    .sort((a, b) => (Number(a.roomNo) || 0) - (Number(b.roomNo) || 0))
+                                    .map(r => {
+                                        const isAssigned = tasks.some(t => t.roomNo === r.roomNo && t.endStat !== 'Ready');
+                                        return (
+                                            <option key={r.roomNo} value={r.roomNo}>
+                                                {r.roomNo} | {r.cleaningStatus} | {isAssigned ? 'Assigned' : 'Not Assigned'}
+                                            </option>
+                                        );
+                                    })}
                             </select>
                         </div>
                         <div className="lg:col-span-3">
