@@ -181,9 +181,17 @@ export default function Bookings() {
         setConfirmModal({
             show: true,
             message: 'Are you sure you want to delete this booking?',
-            onConfirm: () => {
-                // Actual delete logic here if needed
-                setMessageModal({ show: true, message: 'Delete functionality implemented (Mock).', title: 'System Message' });
+            onConfirm: async () => {
+                try {
+                    await db.bookings.delete(selectedBooking.bookingId);
+                    await loadData();
+                    setSelectedBooking(null);
+                    setFormData(initialForm);
+                    setViewMode('VIEW');
+                    setMessageModal({ show: true, message: 'Booking Deleted Successfully!', title: 'System Message' });
+                } catch (error) {
+                    setMessageModal({ show: true, message: 'Error deleting booking. Please try again.', title: 'Error' });
+                }
             }
         });
     };
